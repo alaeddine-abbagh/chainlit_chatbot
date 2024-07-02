@@ -25,18 +25,21 @@ class TriangleAnglesSum(Scene):
         arcs = []
         colors = [RED, GREEN, BLUE]
         for i in range(3):
-            v1 = vertices[i] - vertices[(i-1)%3]
-            v2 = vertices[(i+1)%3] - vertices[i]
-            angle = np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)))
+            v1 = vertices[(i+1)%3] - vertices[i]
+            v2 = vertices[(i-1)%3] - vertices[i]
+            angle = np.arctan2(np.cross(v1, v2), np.dot(v1, v2))
+            angle = abs(angle)  # Ensure positive angle
             angles.append(angle)
             
             # Create arc
-            arc = Arc(radius=0.3, angle=angle, color=colors[i])
+            arc = Arc(radius=0.5, angle=angle, color=colors[i])
             arc.move_arc_center_to(vertices[i])
             
             # Rotate arc to align with angle
             rotation_angle = np.arctan2(v1[1], v1[0])
             arc.rotate(rotation_angle, about_point=vertices[i])
+            if v1[0] * v2[1] - v1[1] * v2[0] < 0:
+                arc.rotate(PI, about_point=vertices[i])
             
             arcs.append(arc)
 
