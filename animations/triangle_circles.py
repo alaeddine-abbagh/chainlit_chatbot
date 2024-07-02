@@ -99,10 +99,10 @@ class TriangleCircles(Scene):
 
     def show_solution(self, A, B, C, P, Q, R, X):
         # Create and animate the angles
-        angle_XQC = Angle(X, Q, C, radius=0.5, color=YELLOW)
-        angle_XPC = Angle(X, P, C, radius=0.5, color=PINK)
-        angle_BPX = Angle(B, P, X, radius=0.5, color=GREEN)
-        angle_BRX = Angle(B, R, X, radius=0.5, color=ORANGE)
+        angle_XQC = Angle(Line(Q, X), Line(Q, C), color=YELLOW, radius=0.5)
+        angle_XPC = Angle(Line(P, X), Line(P, C), color=PINK, radius=0.5)
+        angle_BPX = Angle(Line(P, B), Line(P, X), color=GREEN, radius=0.5)
+        angle_BRX = Angle(Line(R, B), Line(R, X), color=ORANGE, radius=0.5)
 
         self.play(Create(angle_XQC), Create(angle_XPC))
         self.wait(0.5)
