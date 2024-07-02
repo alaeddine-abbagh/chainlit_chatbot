@@ -109,6 +109,11 @@ class TriangleCircles(Scene):
         # Update the positions of A, B, C, P, Q, R, X
         A, B, C, P, Q, R, X = [point + shift_vector for point in [A, B, C, P, Q, R, X]]
 
+        # Remove the pink and yellow circles
+        circle_AQR = self.mobjects[-4]  # Adjust this index if needed
+        circle_BRP = self.mobjects[-3]  # Adjust this index if needed
+        self.play(FadeOut(circle_AQR), FadeOut(circle_BRP))
+
         # Draw lines QX and PX
         line_QX = Line(Q, X, color=WHITE)
         line_PX = Line(P, X, color=WHITE)
@@ -133,6 +138,10 @@ class TriangleCircles(Scene):
         eq1 = MathTex(r"\angle XQC + \angle XPC = 180°", color=WHITE).scale(0.8).next_to(question_mark, DOWN, buff=0.5).shift(LEFT * 0.5)
         self.play(Write(eq1))
         self.wait(1)
+
+        # Remove the equation and the interrogation point
+        self.play(FadeOut(eq1), FadeOut(question_mark))
+        self.wait(0.5)
 
         # Highlight B, P, C alignment
         line_BPC = Line(B, C, color=WHITE)
