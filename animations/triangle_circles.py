@@ -110,8 +110,8 @@ class TriangleCircles(Scene):
         A, B, C, P, Q, R, X = [point + shift_vector for point in [A, B, C, P, Q, R, X]]
 
         # Draw lines QX and PX
-        line_QX = Line(Q, X, color=PINK)
-        line_PX = Line(P, X, color=YELLOW)
+        line_QX = Line(Q, X, color=WHITE)
+        line_PX = Line(P, X, color=WHITE)
         self.play(Create(line_QX), Create(line_PX))
         self.wait(0.5)
 
@@ -124,13 +124,13 @@ class TriangleCircles(Scene):
         angle_XQC = Angle(Line(Q, X), Line(Q, C), color=YELLOW, radius=0.5)
         angle_XPC = Angle(Line(P, C), Line(P, X), color=PINK, radius=0.5)
         angle_BPX = Angle(Line(P, X), Line(P, B), color=GREEN, radius=0.5)
-        angle_BRX = Angle(Line(R, B), Line(R, X), color=ORANGE, radius=0.5)
+        angle_BRX = Angle(Line(R, B), Line(R, X), color=PINK, radius=0.5)
 
         self.play(Create(VGroup(angle_XQC, angle_XPC)))
         self.wait(0.5)
 
         # Show XQC + XPC = 180° on the right side
-        eq1 = MathTex(r"\angle XQC + \angle XPC = 180°", color=WHITE).scale(0.8).next_to(question_mark, DOWN, buff=0.5)
+        eq1 = MathTex(r"\angle XQC + \angle XPC = 180°", color=WHITE).scale(0.8).next_to(question_mark, DOWN, buff=0.5).shift(LEFT * 0.5)
         self.play(Write(eq1))
         self.wait(1)
 
@@ -161,8 +161,8 @@ class TriangleCircles(Scene):
 
         # Final emphasis
         self.play(
-            Indicate(angle_XPC),
-            Indicate(angle_BRX),
+            Indicate(angle_XPC,color=ORANGE, scale_factor=1.2),
+            Indicate(angle_BRX,color=ORANGE, scale_factor=1.2),
             run_time=2
         )
         self.wait(1)
