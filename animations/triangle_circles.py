@@ -75,7 +75,7 @@ class TriangleCircles(Scene):
         self.wait(0.5)
         
         # Emphasize the question
-        question = Text("Does X lie on circle CPQ?", font_size=32, color=YELLOW).next_to(R, 0.1*LEFT+ 3* DOWN)
+        question = Text("Does X lie on circle CPQ?", font_size=32, color=YELLOW).to_edge(DOWN, buff=0.5)
         self.play(Write(question), run_time=1.5)
         self.wait(1)
         
