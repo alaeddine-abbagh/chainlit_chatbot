@@ -56,11 +56,7 @@ class TriangleCircles(Scene):
         point_X = Dot(X, color=PURPLE)
         label_X = MathTex("X").next_to(X, 2*DOWN+2*LEFT, buff=0.2)
         
-        # Title
-        title = Text("Triangle and Three Circles", font_size=36).to_edge(UP)
-        self.play(Write(title))
-        self.wait(1)
-        
+                
         # Animation
         self.play(Create(triangle), run_time=1.5)
         self.play(Write(labels), run_time=1)
@@ -79,7 +75,7 @@ class TriangleCircles(Scene):
         self.wait(0.5)
         
         # Emphasize the question
-        question = Text("Does X lie on circle CPQ?", font_size=32, color=YELLOW).next_to(title, DOWN)
+        question = Text("Does X lie on circle CPQ?", font_size=32, color=YELLOW).next_to(R, 0.1*LEFT+ 3* DOWN)
         self.play(Write(question), run_time=1.5)
         self.wait(1)
         
@@ -95,14 +91,8 @@ class TriangleCircles(Scene):
             circle_CPQ.animate.set_stroke(width=6),
             point_X.animate.scale(1.5),
             run_time=2
-        )
-        
-        # Conclusion
-        conclusion = Text("X lies on all three circles!", font_size=32, color=GREEN).next_to(question, DOWN)
-        self.play(Write(conclusion), run_time=1.5)
-        
-        self.wait(2)
-
+        )       
+    
 def line_intersection(line1, line2):
     x1, y1 = line1[0][:2]
     x2, y2 = line1[1][:2]
