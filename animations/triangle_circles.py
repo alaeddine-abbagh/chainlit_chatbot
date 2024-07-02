@@ -26,7 +26,7 @@ class TriangleCircles(Scene):
             Dot(R, color=BLUE)
         )
         point_labels = VGroup(
-            MathTex("P").next_to(P, RIGHT, buff=0.2),
+            MathTex("P").next_to(P, UP+ 2*RIGHT, buff=0.2),
             MathTex("Q").next_to(Q, UP+LEFT, buff=0.2),
             MathTex("R").next_to(R, DOWN+LEFT, buff=0.2)
         )
@@ -54,7 +54,7 @@ class TriangleCircles(Scene):
 
         X = circle_intersection(circle_AQR, circle_BRP)
         point_X = Dot(X, color=PURPLE)
-        label_X = MathTex("X").next_to(X, UP+RIGHT, buff=0.2)
+        label_X = MathTex("X").next_to(X, 2*DOWN+2*LEFT, buff=0.2)
         
         # Animation
         self.play(Create(triangle), Write(labels))
