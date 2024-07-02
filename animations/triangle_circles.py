@@ -11,9 +11,9 @@ class TriangleCircles(Scene):
         
         # Create labels for the vertices
         labels = VGroup(
-            MathTex("A", color=YELLOW).next_to(A, DOWN+LEFT, buff=0.2),
-            MathTex("B", color=YELLOW).next_to(B, DOWN+RIGHT, buff=0.2),
-            MathTex("C", color=YELLOW).next_to(C, UP, buff=0.2)
+            MathTex("A", color=RED).next_to(A, DOWN+LEFT, buff=0.2),
+            MathTex("B", color=GREEN).next_to(B, DOWN+RIGHT, buff=0.2),
+            MathTex("C", color=BLUE).next_to(C, UP, buff=0.2)
         )
         
         # Create points P, Q, R
@@ -22,13 +22,13 @@ class TriangleCircles(Scene):
         R = A + (B - A) * 0.60
         points = VGroup(
             Dot(P, color=YELLOW),
-            Dot(Q, color=YELLOW),
-            Dot(R, color=YELLOW)
+            Dot(Q, color=PINK),
+            Dot(R, color=ORANGE)
         )
         point_labels = VGroup(
             MathTex("P", color=YELLOW).next_to(P, UP+ 2*RIGHT, buff=0.2),
-            MathTex("Q", color=YELLOW).next_to(Q, UP+LEFT, buff=0.2),
-            MathTex("R", color=YELLOW).next_to(R, 2*DOWN, buff=0.2)
+            MathTex("Q", color=PINK).next_to(Q, UP+LEFT, buff=0.2),
+            MathTex("R", color=ORANGE).next_to(R, 2*DOWN, buff=0.2)
         )
         
         # Create circles
