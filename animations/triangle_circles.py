@@ -11,9 +11,9 @@ class TriangleCircles(Scene):
         
         # Create labels for the vertices
         labels = VGroup(
-            MathTex("A").next_to(A, DOWN+LEFT, buff=0.2),
-            MathTex("B").next_to(B, DOWN+RIGHT, buff=0.2),
-            MathTex("C").next_to(C, UP, buff=0.2)
+            MathTex("A", color=YELLOW).next_to(A, DOWN+LEFT, buff=0.2),
+            MathTex("B", color=YELLOW).next_to(B, DOWN+RIGHT, buff=0.2),
+            MathTex("C", color=YELLOW).next_to(C, UP, buff=0.2)
         )
         
         # Create points P, Q, R
@@ -26,9 +26,9 @@ class TriangleCircles(Scene):
             Dot(R, color=YELLOW)
         )
         point_labels = VGroup(
-            MathTex("P").next_to(P, UP+ 2*RIGHT, buff=0.2),
-            MathTex("Q").next_to(Q, UP+LEFT, buff=0.2),
-            MathTex("R").next_to(R, 2*DOWN, buff=0.2)
+            MathTex("P", color=YELLOW).next_to(P, UP+ 2*RIGHT, buff=0.2),
+            MathTex("Q", color=YELLOW).next_to(Q, UP+LEFT, buff=0.2),
+            MathTex("R", color=YELLOW).next_to(R, 2*DOWN, buff=0.2)
         )
         
         # Create circles
@@ -54,7 +54,7 @@ class TriangleCircles(Scene):
 
         X = circle_intersection(circle_AQR, circle_BRP)
         point_X = Dot(X, color=YELLOW)
-        label_X = MathTex("X").next_to(X, 2*DOWN+2*LEFT, buff=0.2)
+        label_X = MathTex("X", color=YELLOW).next_to(X, 2*DOWN+2*LEFT, buff=0.2)
         
                 
         # Animation
