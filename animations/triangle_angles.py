@@ -19,11 +19,19 @@ class TriangleAnglesSum(Scene):
         self.play(Create(triangle))
         self.play(Write(labels))
         
+        # Calculate angles
+        vertices = triangle.get_vertices()
+        angles = []
+        for i in range(3):
+            v1 = vertices[i] - vertices[(i-1)%3]
+            v2 = vertices[(i+1)%3] - vertices[i]
+            angle = np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)))
+            angles.append(angle)
+
         # Highlight each angle and add it to the equation
-        for i, color in enumerate([RED, GREEN, BLUE]):
-            angle = triangle.get_angle(i)
+        for i, (angle, color) in enumerate(zip(angles, [RED, GREEN, BLUE])):
             arc = Arc(radius=0.5, angle=angle, color=color)
-            arc.move_arc_center_to(triangle.get_vertices()[i])
+            arc.move_arc_center_to(vertices[i])
             
             self.play(Create(arc))
             self.play(labels[i].animate.set_color(color))
