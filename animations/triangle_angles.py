@@ -36,8 +36,11 @@ class TriangleAnglesSum(Scene):
             arc.move_arc_center_to(vertices[i])
             
             # Rotate arc to align with angle
-            rotation_angle = self.angle_of_vector(v2)
+            rotation_angle = self.angle_of_vector(v1)
             arc.rotate(rotation_angle, about_point=vertices[i])
+            
+            # Adjust arc position
+            arc.shift(vertices[i] - arc.get_center())
             
             arcs.append(arc)
 
