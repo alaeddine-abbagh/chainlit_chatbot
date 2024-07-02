@@ -23,6 +23,7 @@ class TriangleAnglesSum(Scene):
         vertices = triangle.get_vertices()
         angles = []
         arcs = []
+        colors = [RED, GREEN, BLUE]
         for i in range(3):
             v1 = vertices[i] - vertices[(i-1)%3]
             v2 = vertices[(i+1)%3] - vertices[i]
@@ -30,7 +31,7 @@ class TriangleAnglesSum(Scene):
             angles.append(angle)
             
             # Create arc
-            arc = Arc(radius=0.3, angle=angle, color=[RED, GREEN, BLUE][i])
+            arc = Arc(radius=0.3, angle=angle, color=colors[i])
             arc.move_arc_center_to(vertices[i])
             
             # Rotate arc to align with angle
@@ -41,9 +42,8 @@ class TriangleAnglesSum(Scene):
 
         # Highlight each angle and add it to the equation
         for i, (angle, arc) in enumerate(zip(angles, arcs)):
-            
             self.play(Create(arc))
-            self.play(labels[i].animate.set_color(color))
+            self.play(labels[i].animate.set_color(colors[i]))
             self.play(TransformFromCopy(labels[i], equation[2*i]))
             
             if i < 2:
