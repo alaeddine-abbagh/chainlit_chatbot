@@ -34,7 +34,7 @@ class TriangleCircles(Scene):
         # Create circles
         circle_AQR = Circle.from_three_points(A, Q, R, color=YELLOW)
         circle_BRP = Circle.from_three_points(B, R, P, color=PINK)
-        circle_CPQ = Circle.from_three_points(C, P, Q, color=ORANGE)
+        circle_CPQ = Circle.from_three_points(C, P, Q, color=ORANGE, stroke_style=DashedVMobject.CONFIG["dash_spacing"])
         
         # Find intersection point X
         X = line_intersection(
