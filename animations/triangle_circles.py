@@ -99,8 +99,9 @@ class TriangleCircles(Scene):
 
     def show_solution(self, A, B, C, P, Q, R, X):
         # Move the entire figure slightly to the left
+        vmobjects = [mob for mob in self.mobjects if isinstance(mob, VMobject)]
         self.play(
-            VGroup(*self.mobjects).animate.shift(LEFT * 1.5),
+            VGroup(*vmobjects).animate.shift(LEFT * 1.5),
             run_time=1
         )
 
