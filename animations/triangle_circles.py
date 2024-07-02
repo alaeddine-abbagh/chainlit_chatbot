@@ -19,7 +19,7 @@ class TriangleCircles(Scene):
         # Create points P, Q, R
         P = B + (C - B) * 0.6
         Q = C + (A - C) * 0.35  # Moved Q slightly towards C
-        R = A + (B - A) * 0.65  # Moved R slightly towards A
+        R = A + (B - A) * 0.60  # Moved R slightly more towards A
         points = VGroup(
             Dot(P, color=RED),
             Dot(Q, color=GREEN),
@@ -37,12 +37,24 @@ class TriangleCircles(Scene):
         circle_CPQ = DashedVMobject(Circle.from_three_points(C, P, Q, color=ORANGE), num_dashes=50)
         
         # Find intersection point X
-        X = line_intersection(
-            [circle_AQR.get_center(), circle_BRP.get_center()],
-            [A, B]
-        )
+        def circle_intersection(circle1, circle2):
+            center1, radius1 = circle1.get_center(), circle1.radius
+            center2, radius2 = circle2.get_center(), circle2.radius
+            d = np.linalg.norm(center1 - center2)
+            a = (radius1**2 - radius2**2 + d**2) / (2*d)
+            h = np.sqrt(radius1**2 - a**2)
+            p = center1 + a * (center2 - center1) / d
+            perp = np.array([-center2[1] + center1[1], center2[0] - center1[0], 0])
+            X1 = p + h * perp / np.linalg.norm(perp)
+            X2 = p - h * perp / np.linalg.norm(perp)
+            # Return the point inside the triangle
+            if np.dot(X1 - A, B - A) > 0 and np.dot(X1 - B, C - B) > 0 and np.dot(X1 - C, A - C) > 0:
+                return X1
+            return X2
+
+        X = circle_intersection(circle_AQR, circle_BRP)
         point_X = Dot(X, color=PURPLE)
-        label_X = MathTex("X").next_to(X, DOWN+RIGHT, buff=0.2)
+        label_X = MathTex("X").next_to(X, UP+RIGHT, buff=0.2)
         
         # Animation
         self.play(Create(triangle), Write(labels))
