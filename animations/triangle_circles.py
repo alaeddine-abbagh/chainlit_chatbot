@@ -21,9 +21,9 @@ class TriangleCircles(Scene):
         Q = C + (A - C) * 0.35
         R = A + (B - A) * 0.60
         points = VGroup(
-            Dot(P, color=RED),
-            Dot(Q, color=GREEN),
-            Dot(R, color=BLUE)
+            Dot(P, color=YELLOW),
+            Dot(Q, color=YELLOW),
+            Dot(R, color=YELLOW)
         )
         point_labels = VGroup(
             MathTex("P").next_to(P, UP+ 2*RIGHT, buff=0.2),
@@ -53,7 +53,7 @@ class TriangleCircles(Scene):
             return X2
 
         X = circle_intersection(circle_AQR, circle_BRP)
-        point_X = Dot(X, color=PURPLE)
+        point_X = Dot(X, color=YELLOW)
         label_X = MathTex("X").next_to(X, 2*DOWN+2*LEFT, buff=0.2)
         
                 
