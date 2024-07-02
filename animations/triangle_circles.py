@@ -102,7 +102,8 @@ class TriangleCircles(Scene):
         line_QX = Line(Q, X, color=YELLOW)
         line_PX = Line(P, X, color=PINK)
         self.play(Create(line_QX), Create(line_PX))
-        self.wait(0.5)
+        self.wait(0.5)    
+        self.play(Create(line_QX), Create(line_PX))
 
         # Add an interrogation point
         question_mark = Text("?", font_size=72, color=YELLOW).move_to(UP * 2)
@@ -111,8 +112,8 @@ class TriangleCircles(Scene):
 
         # Create and animate the angles
         angle_XQC = Angle(Line(Q, X), Line(Q, C), color=YELLOW, radius=0.5)
-        angle_XPC = Angle(Line(P, X), Line(P, C), color=PINK, radius=0.5)
-        angle_BPX = Angle(Line(P, B), Line(P, X), color=GREEN, radius=0.5)
+        angle_XPC = Angle(Line(P, C), Line(P, X), color=PINK, radius=0.5)
+        angle_BPX = Angle(Line(P, X), Line(P, B), color=GREEN, radius=0.5)
         angle_BRX = Angle(Line(R, B), Line(R, X), color=ORANGE, radius=0.5)
 
         self.play(Create(angle_XQC), Create(angle_XPC))
