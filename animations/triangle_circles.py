@@ -98,15 +98,20 @@ class TriangleCircles(Scene):
         self.show_solution(A, B, C, P, Q, R, X)
 
     def show_solution(self, A, B, C, P, Q, R, X):
+        # Move the entire figure slightly to the left
+        self.play(
+            VGroup(*self.mobjects).animate.shift(LEFT * 1.5),
+            run_time=1
+        )
+
         # Draw lines QX and PX
         line_QX = Line(Q, X, color=YELLOW)
         line_PX = Line(P, X, color=PINK)
         self.play(Create(line_QX), Create(line_PX))
-        self.wait(0.5)    
-        self.play(Create(line_QX), Create(line_PX))
+        self.wait(0.5)
 
-        # Add an interrogation point
-        question_mark = Text("?", font_size=72, color=YELLOW).move_to(UP * 2)
+        # Add an interrogation point on the right side
+        question_mark = Text("?", font_size=72, color=YELLOW).to_edge(RIGHT, buff=1.5).shift(UP * 2)
         self.play(Write(question_mark))
         self.wait(1)
 
@@ -119,8 +124,8 @@ class TriangleCircles(Scene):
         self.play(Create(angle_XQC), Create(angle_XPC))
         self.wait(0.5)
 
-        # Show XQC + XPC = 180°
-        eq1 = MathTex(r"\angle XQC + \angle XPC = 180°", color=WHITE).next_to(question_mark, DOWN)
+        # Show XQC + XPC = 180° on the right side
+        eq1 = MathTex(r"\angle XQC + \angle XPC = 180°", color=WHITE).next_to(question_mark, DOWN, buff=0.5)
         self.play(Write(eq1))
         self.wait(1)
 
