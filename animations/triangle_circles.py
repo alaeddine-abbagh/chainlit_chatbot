@@ -98,6 +98,17 @@ class TriangleCircles(Scene):
         self.show_solution(A, B, C, P, Q, R, X)
 
     def show_solution(self, A, B, C, P, Q, R, X):
+        # Draw lines QX and PX
+        line_QX = Line(Q, X, color=YELLOW)
+        line_PX = Line(P, X, color=PINK)
+        self.play(Create(line_QX), Create(line_PX))
+        self.wait(0.5)
+
+        # Add an interrogation point
+        question_mark = Text("?", font_size=72, color=YELLOW).move_to(UP * 2)
+        self.play(Write(question_mark))
+        self.wait(1)
+
         # Create and animate the angles
         angle_XQC = Angle(Line(Q, X), Line(Q, C), color=YELLOW, radius=0.5)
         angle_XPC = Angle(Line(P, X), Line(P, C), color=PINK, radius=0.5)
@@ -108,7 +119,7 @@ class TriangleCircles(Scene):
         self.wait(0.5)
 
         # Show XQC + XPC = 180°
-        eq1 = MathTex(r"\angle XQC + \angle XPC = 180°", color=WHITE).to_edge(UP)
+        eq1 = MathTex(r"\angle XQC + \angle XPC = 180°", color=WHITE).next_to(question_mark, DOWN)
         self.play(Write(eq1))
         self.wait(1)
 
