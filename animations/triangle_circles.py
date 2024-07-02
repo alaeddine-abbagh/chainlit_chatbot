@@ -18,8 +18,8 @@ class TriangleCircles(Scene):
         
         # Create points P, Q, R
         P = B + (C - B) * 0.6
-        Q = C + (A - C) * 0.35  # Moved Q slightly towards C
-        R = A + (B - A) * 0.60  # Moved R slightly more towards A
+        Q = C + (A - C) * 0.35
+        R = A + (B - A) * 0.60
         points = VGroup(
             Dot(P, color=RED),
             Dot(Q, color=GREEN),
@@ -56,12 +56,37 @@ class TriangleCircles(Scene):
         point_X = Dot(X, color=PURPLE)
         label_X = MathTex("X").next_to(X, 2*DOWN+2*LEFT, buff=0.2)
         
+        # Title
+        title = Text("Triangle and Three Circles", font_size=36).to_edge(UP)
+        self.play(Write(title))
+        self.wait(1)
+        
         # Animation
-        self.play(Create(triangle), Write(labels))
-        self.play(Create(points), Write(point_labels))
-        self.play(Create(circle_AQR), Create(circle_BRP))
-        self.play(FadeIn(point_X), Write(label_X))
-        self.play(Create(circle_CPQ))
+        self.play(Create(triangle), run_time=1.5)
+        self.play(Write(labels), run_time=1)
+        self.wait(0.5)
+        
+        self.play(Create(points), run_time=1)
+        self.play(Write(point_labels), run_time=1)
+        self.wait(0.5)
+        
+        # Draw circles one by one
+        for circle in [circle_AQR, circle_BRP]:
+            self.play(Create(circle), run_time=2)
+            self.wait(0.5)
+        
+        self.play(FadeIn(point_X), Write(label_X), run_time=1)
+        self.wait(0.5)
+        
+        # Emphasize the question
+        question = Text("Does X lie on circle CPQ?", font_size=32, color=YELLOW).next_to(title, DOWN)
+        self.play(Write(question), run_time=1.5)
+        self.wait(1)
+        
+        # Draw the dashed circle with emphasis
+        self.play(Create(circle_CPQ), run_time=3)
+        self.play(Indicate(circle_CPQ, color=ORANGE, scale_factor=1.1), run_time=2)
+        self.wait(1)
         
         # Highlight that X is on all three circles
         self.play(
@@ -71,6 +96,10 @@ class TriangleCircles(Scene):
             point_X.animate.scale(1.5),
             run_time=2
         )
+        
+        # Conclusion
+        conclusion = Text("X lies on all three circles!", font_size=32, color=GREEN).next_to(question, DOWN)
+        self.play(Write(conclusion), run_time=1.5)
         
         self.wait(2)
 
