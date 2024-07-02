@@ -121,7 +121,7 @@ class TriangleCircles(Scene):
         angle_BPX = Angle(Line(P, X), Line(P, B), color=GREEN, radius=0.5)
         angle_BRX = Angle(Line(R, B), Line(R, X), color=ORANGE, radius=0.5)
 
-        self.play(Create(angle_XQC), Create(angle_XPC))
+        self.play(Create(VGroup(angle_XQC, angle_XPC)))
         self.wait(0.5)
 
         # Show XQC + XPC = 180° on the right side
