@@ -91,8 +91,60 @@ class TriangleCircles(Scene):
             circle_CPQ.animate.set_stroke(width=6),
             point_X.animate.scale(1.5),
             run_time=2
-        )       
-    
+        )
+        self.wait(1)
+
+        # Start the additional animations for the solution
+        self.show_solution(A, B, C, P, Q, R, X)
+
+    def show_solution(self, A, B, C, P, Q, R, X):
+        # Create and animate the angles
+        angle_XQC = Angle(X, Q, C, radius=0.5, color=YELLOW)
+        angle_XPC = Angle(X, P, C, radius=0.5, color=PINK)
+        angle_BPX = Angle(B, P, X, radius=0.5, color=GREEN)
+        angle_BRX = Angle(B, R, X, radius=0.5, color=ORANGE)
+
+        self.play(Create(angle_XQC), Create(angle_XPC))
+        self.wait(0.5)
+
+        # Show XQC + XPC = 180°
+        eq1 = MathTex(r"\angle XQC + \angle XPC = 180°", color=WHITE).to_edge(UP)
+        self.play(Write(eq1))
+        self.wait(1)
+
+        # Highlight B, P, C alignment
+        line_BPC = Line(B, C, color=WHITE)
+        self.play(Create(line_BPC))
+        self.wait(0.5)
+
+        # Show BPX + XPC = 180°
+        eq2 = MathTex(r"\angle BPX + \angle XPC = 180°", color=WHITE).next_to(eq1, DOWN)
+        self.play(Write(eq2))
+        self.wait(1)
+
+        # Highlight inscribed quadrilateral RXPB
+        quad_RXPB = Polygon(R, X, P, B, color=BLUE, fill_opacity=0.2)
+        self.play(Create(quad_RXPB))
+        self.wait(0.5)
+
+        # Show BRX + BPX = 180°
+        eq3 = MathTex(r"\angle BRX + \angle BPX = 180°", color=WHITE).next_to(eq2, DOWN)
+        self.play(Write(eq3))
+        self.wait(1)
+
+        # Conclude XPC = BRX
+        conclusion = MathTex(r"\therefore \angle XPC = \angle BRX", color=YELLOW).next_to(eq3, DOWN)
+        self.play(Write(conclusion))
+        self.wait(2)
+
+        # Final emphasis
+        self.play(
+            Indicate(angle_XPC),
+            Indicate(angle_BRX),
+            run_time=2
+        )
+        self.wait(1)
+
 def line_intersection(line1, line2):
     x1, y1 = line1[0][:2]
     x2, y2 = line1[1][:2]
