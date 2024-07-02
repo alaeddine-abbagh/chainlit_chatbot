@@ -135,7 +135,7 @@ class TriangleCircles(Scene):
         self.wait(0.5)
 
         # Show XQC + XPC = 180° on the right side
-        eq1 = MathTex(r"\angle XQC + \angle XPC = 180°", color=WHITE).scale(0.8).next_to(question_mark, DOWN, buff=0.5).shift(LEFT * 0.5)
+        eq1 = MathTex(r"\angle XQC + \angle XPC = 180°", color=WHITE).scale(0.8).next_to(question_mark, DOWN, buff=0.5).shift(LEFT * 0.8)
         self.play(Write(eq1))
         self.wait(1)
 
