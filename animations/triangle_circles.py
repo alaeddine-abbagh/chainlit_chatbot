@@ -101,13 +101,13 @@ class TriangleCircles(Scene):
         # Move the entire figure slightly to the left
         vmobjects = [mob for mob in self.mobjects if isinstance(mob, VMobject)]
         self.play(
-            VGroup(*vmobjects).animate.shift(LEFT * 1.5),
+            VGroup(*vmobjects).animate.shift(LEFT * 2),
             run_time=1
         )
 
         # Draw lines QX and PX
-        line_QX = Line(Q, X, color=YELLOW)
-        line_PX = Line(P, X, color=PINK)
+        line_QX = Line(Q, X, color=PINK).shift(LEFT * 2)
+        line_PX = Line(P, X, color=YELLOW).shift(LEFT * 2)
         self.play(Create(line_QX), Create(line_PX))
         self.wait(0.5)
 
