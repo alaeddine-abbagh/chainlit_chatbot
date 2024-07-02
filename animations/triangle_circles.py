@@ -11,24 +11,24 @@ class TriangleCircles(Scene):
         
         # Create labels for the vertices
         labels = VGroup(
-            MathTex("A").next_to(A, DOWN+LEFT),
-            MathTex("B").next_to(B, DOWN+RIGHT),
-            MathTex("C").next_to(C, UP)
+            MathTex("A").next_to(A, DOWN+LEFT, buff=0.2),
+            MathTex("B").next_to(B, DOWN+RIGHT, buff=0.2),
+            MathTex("C").next_to(C, UP, buff=0.2)
         )
         
         # Create points P, Q, R
         P = B + (C - B) * 0.6
-        Q = C + (A - C) * 0.4
-        R = A + (B - A) * 0.7
+        Q = C + (A - C) * 0.35  # Moved Q slightly towards C
+        R = A + (B - A) * 0.65  # Moved R slightly towards A
         points = VGroup(
             Dot(P, color=RED),
             Dot(Q, color=GREEN),
             Dot(R, color=BLUE)
         )
         point_labels = VGroup(
-            MathTex("P").next_to(P, RIGHT),
-            MathTex("Q").next_to(Q, LEFT),
-            MathTex("R").next_to(R, DOWN)
+            MathTex("P").next_to(P, RIGHT, buff=0.2),
+            MathTex("Q").next_to(Q, UP+LEFT, buff=0.2),
+            MathTex("R").next_to(R, DOWN+LEFT, buff=0.2)
         )
         
         # Create circles
@@ -42,7 +42,7 @@ class TriangleCircles(Scene):
             [A, B]
         )
         point_X = Dot(X, color=PURPLE)
-        label_X = MathTex("X").next_to(X, UP+RIGHT)
+        label_X = MathTex("X").next_to(X, DOWN+RIGHT, buff=0.2)
         
         # Animation
         self.play(Create(triangle), Write(labels))
