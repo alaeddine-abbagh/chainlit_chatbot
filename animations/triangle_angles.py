@@ -36,7 +36,9 @@ class TriangleAnglesSum(Scene):
             
             # Calculate the position very close to the vertex
             offset = 0.05  # Adjust this value to fine-tune the position
-            arc_center = vertices[i] + (triangle.get_center() - vertices[i]).normalize() * offset
+            direction = triangle.get_center() - vertices[i]
+            normalized_direction = direction / np.linalg.norm(direction)
+            arc_center = vertices[i] + normalized_direction * offset
             
             # Move arc to the calculated position
             arc.move_arc_center_to(arc_center)
