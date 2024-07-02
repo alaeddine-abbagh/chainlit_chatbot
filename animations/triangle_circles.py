@@ -110,10 +110,10 @@ class TriangleCircles(Scene):
         A, B, C, P, Q, R, X = [point + shift_vector for point in [A, B, C, P, Q, R, X]]
 
         # Find and remove the pink and yellow circles
-
-        circles_to_remove = [mob for mob in self.mobjects if isinstance(mob, Circle) and mob.get_color() in [YELLOW, PINK]]
+        circles_to_remove = [mob for mob in self.mobjects if isinstance(mob, Circle) and mob.color in [YELLOW, PINK]]
         if circles_to_remove:
             self.play(*[FadeOut(circle) for circle in circles_to_remove])
+            self.remove(*circles_to_remove)  # Explicitly remove the circles from the scene
 
         # Draw lines QX and PX
         line_QX = Line(Q, X, color=WHITE)
