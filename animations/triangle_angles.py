@@ -1,4 +1,5 @@
 from manim import *
+import numpy as np
 
 class TriangleAnglesSum(Scene):
     def construct(self):
@@ -7,13 +8,13 @@ class TriangleAnglesSum(Scene):
         
         # Create labels for the angles
         labels = VGroup(
-            MathTex("a").move_to([-2.5, -1, 0]),
-            MathTex("b").move_to([2.5, -1, 0]),
-            MathTex("c").move_to([0, 1.5, 0])
+            MathTex(r"\alpha").move_to([-2.5, -1, 0]),
+            MathTex(r"\beta").move_to([2.5, -1, 0]),
+            MathTex(r"\gamma").move_to([0, 1.5, 0])
         )
         
         # Create the equation
-        equation = MathTex("a", "+", "b", "+", "c", "=", "180°").to_edge(DOWN)
+        equation = MathTex(r"\alpha", "+", r"\beta", "+", r"\gamma", "=", "180°").to_edge(DOWN)
         
         # Add triangle and labels to the scene
         self.play(Create(triangle))
@@ -27,7 +28,7 @@ class TriangleAnglesSum(Scene):
         for i in range(3):
             v1 = vertices[(i+1)%3] - vertices[i]
             v2 = vertices[(i-1)%3] - vertices[i]
-            angle = angle_between_vectors(v1, v2)
+            angle = self.angle_between_vectors(v1, v2)
             angles.append(angle)
             
             # Create arc
@@ -35,16 +36,10 @@ class TriangleAnglesSum(Scene):
             arc.move_arc_center_to(vertices[i])
             
             # Rotate arc to align with angle
-            rotation_angle = angle_of_vector(v2)
+            rotation_angle = self.angle_of_vector(v2)
             arc.rotate(rotation_angle, about_point=vertices[i])
             
             arcs.append(arc)
-
-    def angle_between_vectors(self, v1, v2):
-        return np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)))
-
-    def angle_of_vector(self, v):
-        return np.arctan2(v[1], v[0])
 
         # Highlight each angle and add it to the equation
         for i, (angle, arc) in enumerate(zip(angles, arcs)):
@@ -58,6 +53,35 @@ class TriangleAnglesSum(Scene):
         # Complete the equation
         self.play(Write(equation[5:]))
         
+        # Move angles to form a straight line
+        angle_copies = VGroup(*[arc.copy() for arc in arcs])
+        self.play(FadeIn(angle_copies))
+        
+        target_angles = VGroup(
+            angle_copies[0].copy().move_to([-2, -3, 0]),
+            angle_copies[1].copy().next_to(angle_copies[0], RIGHT, buff=0),
+            angle_copies[2].copy().next_to(angle_copies[1], RIGHT, buff=0)
+        )
+        
+        self.play(
+            *[Transform(angle_copies[i], target_angles[i]) for i in range(3)],
+            run_time=2
+        )
+        
+        # Show the straight line
+        line = Line(start=angle_copies[0].get_left(), end=angle_copies[2].get_right(), color=YELLOW)
+        self.play(Create(line))
+        
         # Final emphasis
         self.play(equation.animate.scale(1.5))
         self.wait(2)
+        
+        # Show rotation
+        self.play(Rotate(triangle, angle=2*PI, about_point=triangle.get_center()), run_time=4)
+        self.wait(1)
+
+    def angle_between_vectors(self, v1, v2):
+        return np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)))
+
+    def angle_of_vector(self, v):
+        return np.arctan2(v[1], v[0])
