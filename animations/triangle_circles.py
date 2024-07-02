@@ -99,15 +99,19 @@ class TriangleCircles(Scene):
 
     def show_solution(self, A, B, C, P, Q, R, X):
         # Move the entire figure slightly to the left
+        shift_vector = LEFT * 2
         vmobjects = [mob for mob in self.mobjects if isinstance(mob, VMobject)]
         self.play(
-            VGroup(*vmobjects).animate.shift(LEFT * 2),
+            VGroup(*vmobjects).animate.shift(shift_vector),
             run_time=1
         )
 
+        # Update the positions of A, B, C, P, Q, R, X
+        A, B, C, P, Q, R, X = [point + shift_vector for point in [A, B, C, P, Q, R, X]]
+
         # Draw lines QX and PX
-        line_QX = Line(Q, X, color=PINK).shift(LEFT * 2)
-        line_PX = Line(P, X, color=YELLOW).shift(LEFT * 2)
+        line_QX = Line(Q, X, color=PINK)
+        line_PX = Line(P, X, color=YELLOW)
         self.play(Create(line_QX), Create(line_PX))
         self.wait(0.5)
 
@@ -126,7 +130,7 @@ class TriangleCircles(Scene):
         self.wait(0.5)
 
         # Show XQC + XPC = 180° on the right side
-        eq1 = MathTex(r"\angle XQC + \angle XPC = 180°", color=WHITE).next_to(question_mark, DOWN, buff=0.5)
+        eq1 = MathTex(r"\angle XQC + \angle XPC = 180°", color=WHITE).scale(0.8).next_to(question_mark, DOWN, buff=0.5)
         self.play(Write(eq1))
         self.wait(1)
 
