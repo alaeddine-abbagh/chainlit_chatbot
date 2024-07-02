@@ -33,14 +33,17 @@ class TriangleAnglesSum(Scene):
             
             # Create arc
             arc = Arc(radius=0.5, angle=angle, color=colors[i])
-            arc.move_arc_center_to(vertices[i])
+            
+            # Calculate the midpoint between the vertex and the center of the triangle
+            triangle_center = triangle.get_center()
+            midpoint = (vertices[i] + triangle_center) / 2
+            
+            # Move arc to the midpoint
+            arc.move_arc_center_to(midpoint)
             
             # Rotate arc to align with angle
             rotation_angle = self.angle_of_vector(v1)
-            arc.rotate(rotation_angle, about_point=vertices[i])
-            
-            # Adjust arc position
-            arc.shift(vertices[i] - arc.get_center())
+            arc.rotate(rotation_angle, about_point=midpoint)
             
             arcs.append(arc)
 
