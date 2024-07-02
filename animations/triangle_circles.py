@@ -75,13 +75,13 @@ class TriangleCircles(Scene):
         self.wait(0.5)
         
         # Emphasize the question
-        question = Text("Does X lie on circle CPQ?", font_size=32, color=YELLOW).to_edge(DOWN, buff=0.5)
+        question = Text("Does X lie on circle CPQ?", font_size=32, color=ORANGE).to_edge(DOWN, buff=0.5)
         self.play(Write(question), run_time=1.5)
         self.wait(1)
         
         # Draw the dashed circle with emphasis
         self.play(Create(circle_CPQ), run_time=3)
-        self.play(Indicate(circle_CPQ, color=ORANGE, scale_factor=1.1), run_time=2)
+        self.play(Indicate(circle_CPQ, color=ORANGE, scale_factor=1.3), run_time=2)
         self.wait(1)
         
         # Highlight that X is on all three circles
