@@ -27,8 +27,7 @@ class TriangleAnglesSum(Scene):
         for i in range(3):
             v1 = vertices[(i+1)%3] - vertices[i]
             v2 = vertices[(i-1)%3] - vertices[i]
-            angle = np.arctan2(np.cross(v1, v2), np.dot(v1, v2))
-            angle = abs(angle)  # Ensure positive angle
+            angle = angle_between_vectors(v1, v2)
             angles.append(angle)
             
             # Create arc
@@ -36,12 +35,16 @@ class TriangleAnglesSum(Scene):
             arc.move_arc_center_to(vertices[i])
             
             # Rotate arc to align with angle
-            rotation_angle = np.arctan2(v1[1], v1[0])
+            rotation_angle = angle_of_vector(v2)
             arc.rotate(rotation_angle, about_point=vertices[i])
-            if v1[0] * v2[1] - v1[1] * v2[0] < 0:
-                arc.rotate(PI, about_point=vertices[i])
             
             arcs.append(arc)
+
+    def angle_between_vectors(self, v1, v2):
+        return np.arccos(np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2)))
+
+    def angle_of_vector(self, v):
+        return np.arctan2(v[1], v[0])
 
         # Highlight each angle and add it to the equation
         for i, (angle, arc) in enumerate(zip(angles, arcs)):
