@@ -28,7 +28,7 @@ class TriangleCircles(Scene):
         point_labels = VGroup(
             MathTex("P").next_to(P, UP+ 2*RIGHT, buff=0.2),
             MathTex("Q").next_to(Q, UP+LEFT, buff=0.2),
-            MathTex("R").next_to(R, DOWN+LEFT, buff=0.2)
+            MathTex("R").next_to(R, 2*DOWN, buff=0.2)
         )
         
         # Create circles
