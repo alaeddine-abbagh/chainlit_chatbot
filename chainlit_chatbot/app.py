@@ -56,6 +56,7 @@ async def main(message: str):
             messages=conversation_history,
             max_tokens=150
         )
+        print("got response: ", response)
 
         # Extract assistant's reply
         assistant_message = response.choices[0].message
