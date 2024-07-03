@@ -15,9 +15,38 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 async def start():
     cl.user_session.set("conversation_history", [])
 
+
 @cl.on_message
 async def main(message: cl.Message):
     conversation_history = cl.user_session.get("conversation_history")
+
+    # Check if a file was uploaded
+    if message.elements:
+        for element in message.elements:
+            if isinstance(element, cl.File):
+                file = element
+                if file.mime == "text/plain":
+                    file_content = await file.get_contents()
+                elif file.mime == "application/pdf":
+                    pdf_content = await file.get_contents()
+                    pdf_reader = PyPDF2.PdfReader(io.BytesIO(pdf_content))
+                    file_content = ""
+                    for page in pdf_reader.pages:
+                        file_content += page.extract_text()
+                else:
+                    await cl.Message(content=f"Unsupported file type: {file.mime}").send()
+                    return
+
+                # Summarize file content
+                summary = generate_summary(file_content)
+                
+                # Add file summary to conversation history
+                conversation_history.append({"role": "system", "content": f"The user has uploaded a file. Here's a summary of its content:\n\n{summary}"})
+                cl.user_session.set("conversation_history", conversation_history)
+                
+                await cl.Message(content=f"File '{file.name}' has been uploaded and summarized. Here's a summary:\n\n{summary}\n\nYou can now ask questions about its content.").send()
+                return
+
     conversation_history.append({"role": "user", "content": message.content})
 
     # Generate response using OpenAI
@@ -32,29 +61,6 @@ async def main(message: cl.Message):
     cl.user_session.set("conversation_history", conversation_history)
 
     await cl.Message(content=assistant_message.content).send()
-
-@cl.on_file_upload(accept=["text/plain", "application/pdf"])
-async def handle_file_upload(file: cl.File):
-    if file.type == "text/plain":
-        file_content = file.content.decode("utf-8")
-    elif file.type == "application/pdf":
-        pdf_reader = PyPDF2.PdfReader(io.BytesIO(file.content))
-        file_content = ""
-        for page in pdf_reader.pages:
-            file_content += page.extract_text()
-    else:
-        await cl.Message(content=f"Unsupported file type: {file.type}").send()
-        return
-
-    # Summarize file content
-    summary = generate_summary(file_content)
-    
-    # Add file summary to conversation history
-    conversation_history = cl.user_session.get("conversation_history")
-    conversation_history.append({"role": "system", "content": f"The user has uploaded a file. Here's a summary of its content:\n\n{summary}"})
-    cl.user_session.set("conversation_history", conversation_history)
-    
-    await cl.Message(content=f"File '{file.name}' has been uploaded and summarized. Here's a summary:\n\n{summary}\n\nYou can now ask questions about its content.").send()
 
 def generate_summary(text):
     response = client.chat.completions.create(
