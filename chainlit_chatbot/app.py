@@ -37,7 +37,18 @@ async def main(message: cl.Message):
                         pdf_reader = PyPDF2.PdfReader(io.BytesIO(file.content))
                         file_content = ""
                         for page in pdf_reader.pages:
-                            file_content += page.extract_text()
+                            page_content = page.extract_text()
+                            if page_content:
+                                file_content += page_content + "\n\n"  # Add newlines between pages
+                        
+                        if not file_content.strip():
+                            # If no text was extracted, try reading it as a scanned PDF
+                            import pytesseract
+                            from pdf2image import convert_from_bytes
+                            
+                            images = convert_from_bytes(file.content)
+                            for image in images:
+                                file_content += pytesseract.image_to_string(image) + "\n\n"
                         
                         # Check if extracted content is empty
                         if not file_content.strip():
