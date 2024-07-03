@@ -12,21 +12,21 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def ensure_serializable(obj):
     """Ensure the object is JSON serializable."""
-    try:
-        json.dumps(obj)
-        return obj
-    except (TypeError, OverflowError):
-        if isinstance(obj, dict):
-            return {k: ensure_serializable(v) for k, v in obj.items()}
-        elif isinstance(obj, (list, tuple)):
-            return [ensure_serializable(item) for item in obj]
-        elif hasattr(obj, '__dict__'):
-            return ensure_serializable(obj.__dict__)
-        else:
+    if isinstance(obj, dict):
+        return {k: ensure_serializable(v) for k, v in obj.items()}
+    elif isinstance(obj, (list, tuple)):
+        return [ensure_serializable(item) for item in obj]
+    elif hasattr(obj, 'model_dump'):
+        # This handles pydantic models, including OpenAI's Message object
+        return ensure_serializable(obj.model_dump())
+    elif hasattr(obj, '__dict__'):
+        return ensure_serializable(obj.__dict__)
+    else:
+        try:
+            json.dumps(obj)
+            return obj
+        except (TypeError, OverflowError):
             return str(obj)
-
-# Initialize conversation history
-conversation_history = []
 
 @cl.on_chat_start
 async def start():
@@ -48,19 +48,12 @@ async def main(message: str):
             max_tokens=150
         )
 
-        # Extract assistant's reply and convert to a dictionary
+        # Extract assistant's reply
         assistant_message = response.choices[0].message
         reply = assistant_message.content
-        assistant_dict = {
-            "role": assistant_message.role,
-            "content": assistant_message.content
-        }
 
         # Add assistant's reply to history
-        conversation_history.append(ensure_serializable(assistant_dict))
-
-        # Ensure conversation history only contains serializable data
-        conversation_history = ensure_serializable(conversation_history)
+        conversation_history.append(ensure_serializable(assistant_message))
 
         # Update conversation history in session
         cl.user_session.set("conversation_history", conversation_history)
