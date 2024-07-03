@@ -26,10 +26,9 @@ async def main(message: cl.Message):
             if isinstance(element, cl.File):
                 file = element
                 if file.mime == "text/plain":
-                    file_content = await file.get_contents()
+                    file_content = file.content.decode("utf-8")
                 elif file.mime == "application/pdf":
-                    pdf_content = await file.get_contents()
-                    pdf_reader = PyPDF2.PdfReader(io.BytesIO(pdf_content))
+                    pdf_reader = PyPDF2.PdfReader(io.BytesIO(file.content))
                     file_content = ""
                     for page in pdf_reader.pages:
                         file_content += page.extract_text()
