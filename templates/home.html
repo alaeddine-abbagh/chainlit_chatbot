@@ -4,9 +4,115 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Math Education Platform</title>
+    <style>
+        .chat-container {
+            width: 400px;
+            height: 500px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            overflow-y: scroll;
+            padding: 10px;
+        }
+        .chat-message {
+            margin-bottom: 10px;
+        }
+        .chat-message.user {
+            text-align: right;
+            color: #007bff;
+        }
+        .chat-message.assistant {
+            text-align: left;
+            color: #6c757d;
+        }
+        .chat-input {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
     <h1>Welcome to the Math Education Platform</h1>
     <p>Here you can access lectures, solve problems, and connect with teachers.</p>
+    
+    <div class="chat-container">
+        <div class="chat-messages"></div>
+        <input type="text" class="chat-input" placeholder="Type your message..." />
+    </div>
+    
+    <div>
+        <h2>File Upload</h2>
+        <input type="file" id="fileInput" accept=".pdf,.docx">
+        <button onclick="summarizeFile()">Summarize File</button>
+    </div>
+    
+    <div id="summary"></div>
+
+    <script>
+        const chatMessages = document.querySelector('.chat-messages');
+        const chatInput = document.querySelector('.chat-input');
+        let conversationHistory = [];
+
+        chatInput.addEventListener('keyup', (event) => {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        function sendMessage() {
+            const message = chatInput.value.trim();
+            if (message) {
+                addMessage('user', message);
+                chatInput.value = '';
+
+                fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message, conversation_history: conversationHistory })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    addMessage('assistant', data.reply);
+                    conversationHistory = data.conversation_history;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+        }
+
+        function addMessage(role, content) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('chat-message', role);
+            messageElement.textContent = content;
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function summarizeFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            if (file) {
+                const formData = new FormData();
+                formData.append('file', file);
+
+                fetch('/summarize_file', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('summary').textContent = data.summary;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+        }
+    </script>
 </body>
 </html>
