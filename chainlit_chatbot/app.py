@@ -37,6 +37,12 @@ async def main(message: str):
     # Add assistant's reply to history
     conversation_history.append({"role": "assistant", "content": reply})
 
+    # Ensure conversation history only contains serializable data
+    conversation_history = [
+        {"role": msg["role"], "content": msg["content"]}
+        for msg in conversation_history
+    ]
+
     # Update conversation history in session
     cl.user_session.set("conversation_history", conversation_history)
 
