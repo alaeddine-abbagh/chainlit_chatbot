@@ -25,15 +25,29 @@ async def main(message: cl.Message):
         for element in message.elements:
             if isinstance(element, cl.File):
                 file = element
-                if file.mime == "text/plain":
-                    file_content = file.content.decode("utf-8")
-                elif file.mime == "application/pdf":
-                    pdf_reader = PyPDF2.PdfReader(io.BytesIO(file.content))
-                    file_content = ""
-                    for page in pdf_reader.pages:
-                        file_content += page.extract_text()
-                else:
-                    await cl.Message(content=f"Unsupported file type: {file.mime}").send()
+                try:
+                    if file.mime == "text/plain":
+                        file_content = file.content.decode("utf-8")
+                    elif file.mime == "application/pdf":
+                        # Check if file content is empty
+                        if not file.content:
+                            await cl.Message(content="The uploaded PDF file appears to be empty.").send()
+                            return
+                        
+                        pdf_reader = PyPDF2.PdfReader(io.BytesIO(file.content))
+                        file_content = ""
+                        for page in pdf_reader.pages:
+                            file_content += page.extract_text()
+                        
+                        # Check if extracted content is empty
+                        if not file_content.strip():
+                            await cl.Message(content="No text could be extracted from the PDF. It might be scanned or contain only images.").send()
+                            return
+                    else:
+                        await cl.Message(content=f"Unsupported file type: {file.mime}").send()
+                        return
+                except Exception as e:
+                    await cl.Message(content=f"An error occurred while processing the file: {str(e)}").send()
                     return
 
                 # Summarize file content
