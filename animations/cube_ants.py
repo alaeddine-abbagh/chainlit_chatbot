@@ -54,7 +54,7 @@ class CubeAntsAnimation(ThreeDScene):
             self.add(distance_counter, distance_label)
             
             def update_counter(mob):
-                mob.set_value(path_obj.get_length())
+                mob.set_value(path_obj.get_arc_length())
             
             distance_counter.add_updater(update_counter)
             
