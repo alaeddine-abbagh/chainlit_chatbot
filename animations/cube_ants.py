@@ -33,8 +33,9 @@ class CubeAntsAnimation(ThreeDScene):
         # Place 8 ants on the vertices with different colors
         ant_colors = [RED, BLUE, GREEN, YELLOW, PURPLE, ORANGE, PINK, TEAL]
         ants = VGroup(*[
-            Dot(vertex, color=color, radius=0.1)
-            .add(Dot(radius=0.15, color=color, fill_opacity=0.3))  # Add glow effect
+            Sphere(radius=0.15, fill_color=color, fill_opacity=0.8, stroke_width=0)
+            .move_to(vertex)
+            .add(Sphere(radius=0.2, fill_color=color, fill_opacity=0.3, stroke_width=0))  # Add glow effect
             for vertex, color in zip(vertices, ant_colors)
         ])
         
