@@ -71,7 +71,7 @@ async def main(message: cl.Message):
 
     if message.elements:
         for element in message.elements:
-            if isinstance(element, cl.File) and element.mime in ["application/pdf", "application/vnd.openxmlformats-officedocument.presentationml.presentation", "text/csv"]:
+            if isinstance(element, cl.File) and (element.mime in ["application/pdf", "application/vnd.openxmlformats-officedocument.presentationml.presentation", "text/csv"] or element.name.lower().endswith('.csv')):
                 try:
                     summary = await process_file(element)
                     file_type = "PDF" if element.mime == "application/pdf" else "PPT" if element.mime == "application/vnd.openxmlformats-officedocument.presentationml.presentation" else "CSV"
