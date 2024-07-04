@@ -65,14 +65,8 @@ async def main(message: cl.Message):
 
             if not file_content.strip():
                 raise ValueError("No content could be extracted from the file.")
-            
-            summary_prompt = f"Summarize the following content from a {file.name.split('.')[-1].upper()} file (max 150 words):\n\n{file_content[:4000]}"
-            summary_response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[{"role": "user", "content": summary_prompt}],
-                max_tokens=200
-            )
-            return summary_response.choices[0].message.content
+        
+            return file_content
         except Exception as e:
             logger.error(f"Error processing file: {str(e)}", exc_info=True)
             raise
@@ -81,10 +75,11 @@ async def main(message: cl.Message):
         for element in message.elements:
             if isinstance(element, cl.File) and (element.mime in ["application/pdf", "application/vnd.openxmlformats-officedocument.presentationml.presentation", "text/csv"] or element.name.lower().endswith('.csv')):
                 try:
-                    summary = await process_file(element)
+                    file_content = await process_file(element)
+                    summary = generate_summary(file_content)
                     file_type = "PDF" if element.mime == "application/pdf" else "PPT" if element.mime == "application/vnd.openxmlformats-officedocument.presentationml.presentation" else "CSV"
-                    conversation_history.append({"role": "system", "content": f"{file_type} Summary: {summary}"})
-                    await cl.Message(content=f"📄 File '{element.name}' processed. Here's a summary:\n\n{summary}").send()
+                    conversation_history.append({"role": "system", "content": f"{file_type} Content: {file_content}\n\nSummary: {summary}"})
+                    await cl.Message(content=f"📄 File '{element.name}' processed. Here's a summary:\n\n{summary}\n\nYou can now ask questions about this document.").send()
                 except Exception as e:
                     await cl.Message(content=f"❌ Error processing file: {str(e)}").send()
                 return
