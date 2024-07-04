@@ -1,0 +1,13 @@
+# Ignore .env file
+.env
+
+# Ignore Yanis.pdf file
+Yanis.pdf
+
+# Ignore chainlit directory and files
+.chainlit/
+chainlit.md
+
+# Ignore Python cache files
+__pycache__/
+*.pyc
