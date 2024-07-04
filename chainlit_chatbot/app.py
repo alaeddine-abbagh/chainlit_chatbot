@@ -26,54 +26,61 @@ async def main(message: cl.Message):
         for element in message.elements:
             if isinstance(element, cl.File):
                 file = element
-                print(file.mime)
+                print(f"File MIME type: {file.mime}")
+                print(f"File size: {len(file.content)} bytes")
+                
                 try:
-                    if file.mime == "text/plain":
-                        file_content = file.content.decode("utf-8") if file.content else ""
-                    elif file.mime == "application/pdf":
-                        # Debug: Print file size
-                        print(f"PDF file size: {len(file.content) if file.content else 0} bytes")
-                        
+                    if file.mime == "application/pdf":
                         if not file.content:
                             await cl.Message(content="The uploaded PDF file appears to be empty.").send()
                             return
                         
-                        pdf_content = file.content
-                        pdf_reader = PyPDF2.PdfReader(io.BytesIO(pdf_content))
-                        
-                        # Debug: Print number of pages
+                        pdf_reader = PyPDF2.PdfReader(io.BytesIO(file.content))
                         print(f"Number of pages in PDF: {len(pdf_reader.pages)}")
                         
                         file_content = ""
-                        for page in pdf_reader.pages:
+                        for i, page in enumerate(pdf_reader.pages):
                             page_text = page.extract_text() or ""
                             file_content += page_text + "\n\n"
-                            # Debug: Print length of extracted text for each page
-                            print(f"Extracted text length for page: {len(page_text)} characters")
+                            print(f"Page {i+1} extracted text length: {len(page_text)} characters")
                         
-                        # Check if extracted content is empty
                         if not file_content.strip():
                             await cl.Message(content="No text could be extracted from the PDF. It might be scanned or contain only images.").send()
                             return
                         
-                        # Debug: Print total extracted text length
                         print(f"Total extracted text length: {len(file_content)} characters")
+                        
+                        # Summarize file content
+                        summary_prompt = f"Summarize the following text from a PDF (max 150 words):\n\n{file_content[:4000]}"
+                        summary_response = client.chat.completions.create(
+                            model="gpt-3.5-turbo",
+                            messages=[{"role": "user", "content": summary_prompt}],
+                            max_tokens=200
+                        )
+                        summary = summary_response.choices[0].message.content
+                        
+                        # Add file summary to conversation history
+                        conversation_history.append({"role": "system", "content": f"PDF Summary: {summary}"})
+                        cl.user_session.set("conversation_history", conversation_history)
+                        
+                        await cl.Message(content=f"File '{file.name}' has been processed. Here's a summary:\n\n{summary}").send()
+                        return
                     else:
-                        await cl.Message(content=f"Unsupported file type: {file.mime}").send()
+                        await cl.Message(content=f"Unsupported file type: {file.mime}. Please upload a PDF file.").send()
                         return
                 except Exception as e:
                     await cl.Message(content=f"An error occurred while processing the file: {str(e)}").send()
                     return
 
-                # Summarize file content
-                summary = generate_summary(file_content)
-                
-                # Add file summary to conversation history
-                conversation_history.append({"role": "system", "content": f"The user has uploaded a file. Here's a summary of its content:\n\n{summary}"})
-                cl.user_session.set("conversation_history", conversation_history)
-                
-                await cl.Message(content=f"File '{file.name}' has been uploaded and summarized. Here's a summary:\n\n{summary}\n\nYou can now ask questions about its content.").send()
-                return
+            # Summarize file content
+            summary = generate_summary(file_content)
+            
+            # Add file summary to conversation history
+            conversation_history.append({"role": "system", "content": f"The user has uploaded a file. Here's a summary of its content:\n\n{summary}"})
+            cl.user_session.set("conversation_history", conversation_history)
+            
+            await cl.Message(content=f"File '{file.name}' has been uploaded and summarized. Here's a summary:\n\n{summary}\n\nYou can now ask questions about its content.").send()
+            return
 
     conversation_history.append({"role": "user", "content": message.content})
 
