@@ -49,9 +49,6 @@ async def main(message: cl.Message):
                             for i, page in enumerate(pages):
                                 file_content += page.page_content + "\n\n"
                                 logger.info(f"Page {i+1} extracted text length: {len(page.page_content)} characters")
-
-                            os.unlink(temp_file_path)  # Delete the temporary file
-                            logger.info(f"Temporary file deleted: {temp_file_path}")
                         except Exception as e:
                             logger.error(f"An error occurred while processing the PDF: {str(e)}", exc_info=True)
                             await cl.Message(content=f"An error occurred while processing the PDF: {str(e)}").send()
