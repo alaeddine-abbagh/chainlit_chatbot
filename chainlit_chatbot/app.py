@@ -2,8 +2,8 @@ import os
 import chainlit as cl
 from openai import OpenAI
 from dotenv import load_dotenv
-import pdfplumber
-import io
+from langchain.document_loaders import PyPDFLoader
+import tempfile
 
 # Load environment variables
 load_dotenv()
@@ -40,12 +40,19 @@ async def main(message: cl.Message):
                         
                         file_content = ""
                         try:
-                            with pdfplumber.open(io.BytesIO(file.content)) as pdf:
-                                print(f"Number of pages in PDF: {len(pdf.pages)}")
-                                for i, page in enumerate(pdf.pages):
-                                    page_text = page.extract_text() or ""
-                                    file_content += page_text + "\n\n"
-                                    print(f"Page {i+1} extracted text length: {len(page_text)} characters")
+                            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
+                                temp_file.write(file.content)
+                                temp_file_path = temp_file.name
+
+                            loader = PyPDFLoader(temp_file_path)
+                            pages = loader.load_and_split()
+                            
+                            print(f"Number of pages in PDF: {len(pages)}")
+                            for i, page in enumerate(pages):
+                                file_content += page.page_content + "\n\n"
+                                print(f"Page {i+1} extracted text length: {len(page.page_content)} characters")
+
+                            os.unlink(temp_file_path)  # Delete the temporary file
                         except Exception as e:
                             await cl.Message(content=f"An error occurred while processing the PDF: {str(e)}").send()
                             return
