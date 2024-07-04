@@ -32,7 +32,11 @@ class CubeAntsAnimation(ThreeDScene):
         
         # Place 8 ants randomly on the edges with different colors
         ant_colors = [RED, BLUE, GREEN, YELLOW, PURPLE, ORANGE, PINK, TEAL]
-        ants = VGroup(*[Dot(self.random_point_on_edge(vertices, edges), color=color, radius=0.05) for color in ant_colors])
+        ants = VGroup(*[
+            Dot(self.random_point_on_edge(vertices, edges), color=color, radius=0.1)
+            .add(Dot(radius=0.15, color=color, fill_opacity=0.3))  # Add glow effect
+            for color in ant_colors
+        ])
         
         # Add cube to the scene
         self.set_camera_orientation(phi=75 * DEGREES, theta=30 * DEGREES)
