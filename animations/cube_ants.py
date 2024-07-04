@@ -4,8 +4,8 @@ import networkx as nx
 
 class CubeAntsAnimation(ThreeDScene):
     def construct(self):
-        # Create a 3D cube with edge length 2
-        cube = Cube(side_length=2, fill_opacity=0.1, stroke_width=2)
+        # Create a 3D cube with edge length 3
+        cube = Cube(side_length=3, fill_opacity=0.2, stroke_width=3)
         
         # Define the vertices of the cube
         vertices = [
@@ -34,12 +34,16 @@ class CubeAntsAnimation(ThreeDScene):
         ant_colors = [RED, BLUE, GREEN, YELLOW, PURPLE, ORANGE, PINK, TEAL]
         ants = VGroup(*[Dot(self.random_point_on_edge(vertices, edges), color=color, radius=0.05) for color in ant_colors])
         
-        # Add cube and ants to the scene
+        # Add cube to the scene
         self.set_camera_orientation(phi=75 * DEGREES, theta=30 * DEGREES)
-        self.add(cube, ants)
+        self.add(cube)
         
         # Animate the cube rotation
         self.play(Rotate(cube, angle=2*PI, axis=UP, run_time=2))
+        self.wait(1)
+        
+        # Add ants after the cube stops rotating
+        self.play(FadeIn(ants))
         self.wait(1)
         
         # Repeat the process of highlighting paths between random pairs of ants
@@ -55,21 +59,20 @@ class CubeAntsAnimation(ThreeDScene):
             
             # Find and highlight the shortest path
             path = self.find_shortest_path(vertices, edges, ant1, ant2)
-            path_obj = VMobject()
-            path_obj.set_points_smoothly([vertices[i] for i in path])
+            highlighted_edges = VGroup(*[Line(vertices[path[i]], vertices[path[i+1]], color=YELLOW, stroke_width=5) for i in range(len(path)-1)])
             
             distance = self.calculate_path_distance(vertices, path)
-            distance_label = Text(f"Distance: {distance:.2f}", font_size=24).to_corner(UR)
+            distance_label = Text(f"Distance: {distance:.2f}", font_size=24).to_corner(UL)
             self.add(distance_label)
             
-            self.play(Create(path_obj), run_time=2)
+            self.play(Create(highlighted_edges), run_time=2)
             self.wait(1)
             
             # Reset for next iteration
             self.play(
                 ant1.animate.scale(1/1.5),
                 ant2.animate.scale(1/1.5),
-                FadeOut(path_obj),
+                FadeOut(highlighted_edges),
                 FadeOut(distance_label)
             )
     
