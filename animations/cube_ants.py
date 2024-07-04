@@ -30,12 +30,12 @@ class CubeAntsAnimation(ThreeDScene):
         self.graph = nx.Graph()
         self.graph.add_edges_from(edges)
         
-        # Place 8 ants randomly on the edges with different colors
-        ant_colors = [RED, BLUE, GREEN, YELLOW, PURPLE, ORANGE, PINK, TEAL]
+        # Place 12 ants on the edges (one per edge) with different colors
+        ant_colors = [RED, BLUE, GREEN, YELLOW, PURPLE, ORANGE, PINK, TEAL, MAROON, GOLD, LIGHT_BROWN, GRAY]
         ants = VGroup(*[
-            Dot(self.random_point_on_edge(vertices, edges), color=color, radius=0.1)
+            Dot(self.point_on_edge(vertices, edge), color=color, radius=0.1)
             .add(Dot(radius=0.15, color=color, fill_opacity=0.3))  # Add glow effect
-            for color in ant_colors
+            for edge, color in zip(edges, ant_colors)
         ])
         
         # Add cube to the scene
@@ -50,10 +50,13 @@ class CubeAntsAnimation(ThreeDScene):
         self.play(FadeIn(ants))
         self.wait(1)
         
-        # Repeat the process of highlighting paths between random pairs of ants
+        # Repeat the process of highlighting paths from a random ant to its closest neighbor
         for _ in range(3):
-            # Select two random ants
-            ant1, ant2 = random.sample(list(ants), 2)
+            # Select a random ant
+            ant1 = random.choice(ants)
+            
+            # Find the closest ant
+            ant2, path = self.find_closest_ant(vertices, edges, ant1, ants)
             
             # Highlight the selected ants
             self.play(
@@ -61,12 +64,11 @@ class CubeAntsAnimation(ThreeDScene):
                 ant2.animate.scale(1.5)
             )
             
-            # Find and highlight the shortest path
-            path = self.find_shortest_path(vertices, edges, ant1, ant2)
+            # Highlight the shortest path
             highlighted_edges = VGroup(*[Line(vertices[path[i]], vertices[path[i+1]], color=YELLOW, stroke_width=5) for i in range(len(path)-1)])
             
             distance = self.calculate_path_distance(vertices, path)
-            distance_label = Text(f"Distance: {distance:.2f}", font_size=24).to_corner(UL)
+            distance_label = Text(f"Distance to closest: {distance:.2f}", font_size=24).to_corner(UL)
             self.add(distance_label)
             
             self.play(Create(highlighted_edges), run_time=2)
@@ -80,15 +82,28 @@ class CubeAntsAnimation(ThreeDScene):
                 FadeOut(distance_label)
             )
     
-    def random_point_on_edge(self, vertices, edges):
-        edge = random.choice(edges)
-        t = random.random()
+    def point_on_edge(self, vertices, edge):
+        t = 0.5  # Place ant in the middle of the edge
         return vertices[edge[0]] * (1 - t) + vertices[edge[1]] * t
     
-    def find_shortest_path(self, vertices, edges, start, end):
+    def find_closest_ant(self, vertices, edges, start, ants):
         start_index = min(range(len(vertices)), key=lambda i: np.linalg.norm(start.get_center() - vertices[i]))
-        end_index = min(range(len(vertices)), key=lambda i: np.linalg.norm(end.get_center() - vertices[i]))
-        return nx.shortest_path(self.graph, start_index, end_index)
+        min_distance = float('inf')
+        closest_ant = None
+        closest_path = None
+        
+        for ant in ants:
+            if ant == start:
+                continue
+            end_index = min(range(len(vertices)), key=lambda i: np.linalg.norm(ant.get_center() - vertices[i]))
+            path = nx.shortest_path(self.graph, start_index, end_index)
+            distance = self.calculate_path_distance(vertices, path)
+            if distance < min_distance:
+                min_distance = distance
+                closest_ant = ant
+                closest_path = path
+        
+        return closest_ant, closest_path
     
     def calculate_path_distance(self, vertices, path):
         return sum(np.linalg.norm(vertices[path[i]] - vertices[path[i+1]]) for i in range(len(path)-1))
