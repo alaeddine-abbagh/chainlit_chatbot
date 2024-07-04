@@ -7,3 +7,4 @@ python-dotenv
 langchain
 pytesseract
 pdf2image
+python-pptx

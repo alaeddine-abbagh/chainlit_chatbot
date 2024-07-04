@@ -3,6 +3,7 @@ import chainlit as cl
 from openai import OpenAI
 from dotenv import load_dotenv
 from langchain.document_loaders import PyPDFLoader
+from pptx import Presentation
 import logging
 from typing import List, Dict
 
@@ -29,19 +30,25 @@ async def start():
 async def main(message: cl.Message):
     conversation_history: List[Dict[str, str]] = cl.user_session.get("conversation_history", [])
     
-    async def process_pdf(file: cl.File) -> str:
-        logger.info(f"Processing PDF file: {file.name}")
+    async def process_file(file: cl.File) -> str:
+        logger.info(f"Processing file: {file.name}")
         try:
-            loader = PyPDFLoader(file.path)
-            pages = loader.load_and_split()
-            
-            file_content = "\n\n".join(page.page_content for page in pages)
-            logger.info(f"Extracted {len(pages)} pages, total length: {len(file_content)} characters")
-            
+            if file.name.lower().endswith('.pdf'):
+                loader = PyPDFLoader(file.path)
+                pages = loader.load_and_split()
+                file_content = "\n\n".join(page.page_content for page in pages)
+                logger.info(f"Extracted {len(pages)} pages from PDF, total length: {len(file_content)} characters")
+            elif file.name.lower().endswith(('.ppt', '.pptx')):
+                prs = Presentation(file.path)
+                file_content = "\n\n".join(shape.text for slide in prs.slides for shape in slide.shapes if hasattr(shape, 'text'))
+                logger.info(f"Extracted content from PPT, total length: {len(file_content)} characters")
+            else:
+                raise ValueError("Unsupported file type. Please upload a PDF or PPT file.")
+
             if not file_content.strip():
-                raise ValueError("No text could be extracted from the PDF.")
+                raise ValueError("No text could be extracted from the file.")
             
-            summary_prompt = f"Summarize the following text from a PDF (max 150 words):\n\n{file_content[:4000]}"
+            summary_prompt = f"Summarize the following text from a {file.name.split('.')[-1].upper()} file (max 150 words):\n\n{file_content[:4000]}"
             summary_response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[{"role": "user", "content": summary_prompt}],
@@ -49,21 +56,22 @@ async def main(message: cl.Message):
             )
             return summary_response.choices[0].message.content
         except Exception as e:
-            logger.error(f"Error processing PDF: {str(e)}", exc_info=True)
+            logger.error(f"Error processing file: {str(e)}", exc_info=True)
             raise
 
     if message.elements:
         for element in message.elements:
-            if isinstance(element, cl.File) and element.mime == "application/pdf":
+            if isinstance(element, cl.File) and element.mime in ["application/pdf", "application/vnd.openxmlformats-officedocument.presentationml.presentation"]:
                 try:
-                    summary = await process_pdf(element)
-                    conversation_history.append({"role": "system", "content": f"PDF Summary: {summary}"})
+                    summary = await process_file(element)
+                    file_type = "PDF" if element.mime == "application/pdf" else "PPT"
+                    conversation_history.append({"role": "system", "content": f"{file_type} Summary: {summary}"})
                     await cl.Message(content=f"📄 File '{element.name}' processed. Here's a summary:\n\n{summary}").send()
                 except Exception as e:
                     await cl.Message(content=f"❌ Error processing file: {str(e)}").send()
                 return
             else:
-                await cl.Message(content="❌ Unsupported file type. Please upload a PDF file.").send()
+                await cl.Message(content="❌ Unsupported file type. Please upload a PDF or PPT file.").send()
                 return
 
     conversation_history.append({"role": "user", "content": message.content})
