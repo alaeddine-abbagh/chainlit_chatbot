@@ -52,16 +52,13 @@ class CubeAntsAnimation(ThreeDScene):
         
         # Showcase the distance between two neighboring ants
         for _ in range(3):
-            # Select two random neighboring ants
+            # Select two random ants
             ant1, ant2 = random.sample(list(ants), 2)
-            ant1_index = vertices.index(ant1.get_center())
-            ant2_index = vertices.index(ant2.get_center())
+            ant1_index = vertices.index(list(ant1.get_center()))
+            ant2_index = vertices.index(list(ant2.get_center()))
             
             # Check if the ants are neighbors
             if (ant1_index, ant2_index) in edges or (ant2_index, ant1_index) in edges:
-                # Convert vertex positions to numpy arrays for distance calculation
-                pos1 = np.array(vertices[ant1_index])
-                pos2 = np.array(vertices[ant2_index])
                 # Highlight the selected ants
                 self.play(
                     ant1.animate.scale(1.5),
@@ -71,10 +68,13 @@ class CubeAntsAnimation(ThreeDScene):
                 # Highlight the edge between the ants
                 highlighted_edge = Line(ant1.get_center(), ant2.get_center(), color=YELLOW, stroke_width=5)
                 
+                # Calculate distance
+                pos1 = np.array(vertices[ant1_index])
+                pos2 = np.array(vertices[ant2_index])
                 distance = np.linalg.norm(pos1 - pos2)
                 distance_label = Text(f"Distance between neighbors: {distance:.2f}", font_size=24).to_corner(UL)
-                self.add(distance_label)
                 
+                self.add(distance_label)
                 self.play(Create(highlighted_edge), run_time=2)
                 self.wait(1)
                 
