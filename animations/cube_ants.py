@@ -54,8 +54,12 @@ class CubeAntsAnimation(ThreeDScene):
         for _ in range(3):
             # Select two random ants
             ant1, ant2 = random.sample(list(ants), 2)
-            ant1_index = vertices.index(list(ant1.get_center()))
-            ant2_index = vertices.index(list(ant2.get_center()))
+            ant1_center = tuple(ant1.get_center())
+            ant2_center = tuple(ant2.get_center())
+            
+            # Find the indices of the ants in the vertices list
+            ant1_index = next(i for i, v in enumerate(vertices) if np.allclose(v, ant1_center))
+            ant2_index = next(i for i, v in enumerate(vertices) if np.allclose(v, ant2_center))
             
             # Check if the ants are neighbors
             if (ant1_index, ant2_index) in edges or (ant2_index, ant1_index) in edges:
