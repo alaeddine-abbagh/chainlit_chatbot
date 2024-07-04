@@ -58,8 +58,12 @@ class CubeAntsAnimation(ThreeDScene):
             ant2_center = tuple(ant2.get_center())
             
             # Find the indices of the ants in the vertices list
-            ant1_index = next(i for i, v in enumerate(vertices) if np.allclose(v, ant1_center))
-            ant2_index = next(i for i, v in enumerate(vertices) if np.allclose(v, ant2_center))
+            def find_closest_vertex(ant_center):
+                distances = [np.linalg.norm(np.array(v) - np.array(ant_center)) for v in vertices]
+                return distances.index(min(distances))
+        
+            ant1_index = find_closest_vertex(ant1_center)
+            ant2_index = find_closest_vertex(ant2_center)
             
             # Check if the ants are neighbors
             if (ant1_index, ant2_index) in edges or (ant2_index, ant1_index) in edges:
