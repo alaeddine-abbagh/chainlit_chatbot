@@ -35,6 +35,10 @@ async def main(message: cl.Message):
     async def process_file(file: cl.File) -> str:
         logger.info(f"Processing file: {file.name}")
         try:
+            # Check file size (10 MB limit)
+            if os.path.getsize(file.path) > 10 * 1024 * 1024:  # 10 MB in bytes
+                raise ValueError("File size exceeds the 10 MB limit.")
+
             if file.name.lower().endswith('.pdf'):
                 loader = PyPDFLoader(file.path)
                 pages = loader.load_and_split()
@@ -80,8 +84,10 @@ async def main(message: cl.Message):
                     file_type = "PDF" if element.mime == "application/pdf" else "PPT" if element.mime == "application/vnd.openxmlformats-officedocument.presentationml.presentation" else "CSV"
                     conversation_history.append({"role": "system", "content": f"{file_type} Content: {file_content}\n\nSummary: {summary}"})
                     await cl.Message(content=f"📄 File '{element.name}' processed. Here's a summary:\n\n{summary}\n\nYou can now ask questions about this document.").send()
-                except Exception as e:
+                except ValueError as e:
                     await cl.Message(content=f"❌ Error processing file: {str(e)}").send()
+                except Exception as e:
+                    await cl.Message(content=f"❌ An unexpected error occurred while processing the file: {str(e)}").send()
                 return
             else:
                 await cl.Message(content="❌ Unsupported file type. Please upload a PDF, PPT, or CSV file.").send()
