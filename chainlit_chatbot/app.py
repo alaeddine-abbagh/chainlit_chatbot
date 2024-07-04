@@ -6,27 +6,29 @@ from langchain.document_loaders import PyPDFLoader
 import tempfile
 import logging
 
-# Set up logging
+# Set up logging for debugging purposes
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-# Load environment variables
+# Load environment variables from .env file
 load_dotenv()
 
-# Initialize OpenAI client
+# Initialize OpenAI client with API key from environment variables
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 @cl.on_chat_start
 async def start():
+    # Initialize an empty conversation history when a new chat starts
     cl.user_session.set("conversation_history", [])
 
 
 @cl.on_message
 async def main(message: cl.Message):
+    # Retrieve the conversation history from the user session
     conversation_history = cl.user_session.get("conversation_history")
-    files = None
+    files = None  # Initialize files variable (not used in current implementation)
  
-    # Check if a file was uploaded
+    # Check if a file was uploaded with the message
     if message.elements:
         for element in message.elements:
             if isinstance(element, cl.File):
@@ -38,6 +40,7 @@ async def main(message: cl.Message):
                     logger.warning("File content is empty")
                 
                 try:
+                    # Process PDF files
                     if file.mime == "application/pdf":
                         if not file.content:
                             logger.error("The uploaded PDF file appears to be empty.")
@@ -46,11 +49,13 @@ async def main(message: cl.Message):
                         
                         file_content = ""
                         try:
+                            # Create a temporary file to store the PDF content
                             with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
                                 temp_file.write(file.content)
                                 temp_file_path = temp_file.name
                             logger.info(f"Temporary file created: {temp_file_path}")
 
+                            # Use PyPDFLoader to extract text from the PDF
                             loader = PyPDFLoader(temp_file_path)
                             pages = loader.load_and_split()
                             
@@ -73,7 +78,7 @@ async def main(message: cl.Message):
                         
                         logger.info(f"Total extracted text length: {len(file_content)} characters")
                         
-                        # Summarize file content
+                        # Summarize file content using OpenAI's GPT-3.5-turbo
                         summary_prompt = f"Summarize the following text from a PDF (max 150 words):\n\n{file_content[:4000]}"
                         summary_response = client.chat.completions.create(
                             model="gpt-3.5-turbo",
@@ -95,6 +100,7 @@ async def main(message: cl.Message):
                     await cl.Message(content=f"An error occurred while processing the file: {str(e)}").send()
                     return
 
+            # This block is unreachable in the current implementation
             # Summarize file content
             summary = generate_summary(file_content)
             
@@ -105,22 +111,33 @@ async def main(message: cl.Message):
             await cl.Message(content=f"File '{file.name}' has been uploaded and summarized. Here's a summary:\n\n{summary}\n\nYou can now ask questions about its content.").send()
             return
 
+    # If no file was uploaded, process the user's message
     conversation_history.append({"role": "user", "content": message.content})
 
-    # Generate response using OpenAI
+    # Generate response using OpenAI's GPT-4
     response = client.chat.completions.create(
-        model="gpt-4",  # Changed to GPT-4
+        model="gpt-4",
         messages=conversation_history,
         max_tokens=150
     )
 
+    # Extract the assistant's message from the response
     assistant_message = response.choices[0].message
+    # Add the assistant's response to the conversation history
     conversation_history.append({"role": "assistant", "content": assistant_message.content})
+    # Update the conversation history in the user session
     cl.user_session.set("conversation_history", conversation_history)
 
+    # Send the assistant's response back to the user
     await cl.Message(content=assistant_message.content).send()
 
 def generate_summary(text):
+    """
+    Generate a summary of the given text using OpenAI's GPT-4 model.
+    
+    :param text: The text to summarize
+    :return: A summary of the text
+    """
     response = client.chat.completions.create(
         model="gpt-4",
         messages=[
@@ -132,4 +149,5 @@ def generate_summary(text):
     return response.choices[0].message.content
 
 if __name__ == "__main__":
+    # Run the Chainlit app
     cl.run()
