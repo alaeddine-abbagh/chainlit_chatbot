@@ -28,7 +28,7 @@ async def start():
     )
     
     # Display a welcome message
-    await cl.Message(content="Welcome to your sophisticated AI assistant! How can I help you today?").send()
+    await cl.Message(content="Welcome to your AI assistant! How can I help you today?").send()
 
 
 @cl.on_message
