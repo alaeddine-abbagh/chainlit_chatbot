@@ -4,6 +4,8 @@ from openai import OpenAI
 from dotenv import load_dotenv
 from langchain.document_loaders import PyPDFLoader
 from pptx import Presentation
+import csv
+import io
 import logging
 from typing import List, Dict
 
@@ -42,13 +44,21 @@ async def main(message: cl.Message):
                 prs = Presentation(file.path)
                 file_content = "\n\n".join(shape.text for slide in prs.slides for shape in slide.shapes if hasattr(shape, 'text'))
                 logger.info(f"Extracted content from PPT, total length: {len(file_content)} characters")
+            elif file.name.lower().endswith('.csv'):
+                csv_content = []
+                with open(file.path, 'r', newline='', encoding='utf-8') as csvfile:
+                    csv_reader = csv.reader(csvfile)
+                    for row in csv_reader:
+                        csv_content.append(", ".join(row))
+                file_content = "\n".join(csv_content)
+                logger.info(f"Extracted content from CSV, total length: {len(file_content)} characters")
             else:
-                raise ValueError("Unsupported file type. Please upload a PDF or PPT file.")
+                raise ValueError("Unsupported file type. Please upload a PDF, PPT, or CSV file.")
 
             if not file_content.strip():
-                raise ValueError("No text could be extracted from the file.")
+                raise ValueError("No content could be extracted from the file.")
             
-            summary_prompt = f"Summarize the following text from a {file.name.split('.')[-1].upper()} file (max 150 words):\n\n{file_content[:4000]}"
+            summary_prompt = f"Summarize the following content from a {file.name.split('.')[-1].upper()} file (max 150 words):\n\n{file_content[:4000]}"
             summary_response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[{"role": "user", "content": summary_prompt}],
@@ -61,17 +71,17 @@ async def main(message: cl.Message):
 
     if message.elements:
         for element in message.elements:
-            if isinstance(element, cl.File) and element.mime in ["application/pdf", "application/vnd.openxmlformats-officedocument.presentationml.presentation"]:
+            if isinstance(element, cl.File) and element.mime in ["application/pdf", "application/vnd.openxmlformats-officedocument.presentationml.presentation", "text/csv"]:
                 try:
                     summary = await process_file(element)
-                    file_type = "PDF" if element.mime == "application/pdf" else "PPT"
+                    file_type = "PDF" if element.mime == "application/pdf" else "PPT" if element.mime == "application/vnd.openxmlformats-officedocument.presentationml.presentation" else "CSV"
                     conversation_history.append({"role": "system", "content": f"{file_type} Summary: {summary}"})
                     await cl.Message(content=f"📄 File '{element.name}' processed. Here's a summary:\n\n{summary}").send()
                 except Exception as e:
                     await cl.Message(content=f"❌ Error processing file: {str(e)}").send()
                 return
             else:
-                await cl.Message(content="❌ Unsupported file type. Please upload a PDF or PPT file.").send()
+                await cl.Message(content="❌ Unsupported file type. Please upload a PDF, PPT, or CSV file.").send()
                 return
 
     conversation_history.append({"role": "user", "content": message.content})
