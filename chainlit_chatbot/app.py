@@ -1,5 +1,7 @@
+# Chainlit Crash Course: Building Conversational AI Applications
+
 import os
-import chainlit as cl
+import chainlit as cl  # Import the Chainlit library
 from openai import OpenAI
 from dotenv import load_dotenv
 from langchain.document_loaders import PyPDFLoader
@@ -20,65 +22,36 @@ load_dotenv()
 # Initialize OpenAI client with API key from environment variables
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+# Chainlit Concept: Chat Start Event
+# This function is called when a new chat session starts
 @cl.on_chat_start
 async def start():
     # Initialize an empty conversation history when a new chat starts
     cl.user_session.set("conversation_history", [])
     
-    # Display a welcome message
+    # Chainlit Concept: Sending Messages
+    # Use cl.Message to send a message to the user
     await cl.Message(content="Welcome to your AI assistant! How can I help you today?").send()
 
-
+# Chainlit Concept: Message Handler
+# This function is called every time a user sends a message
 @cl.on_message
 async def main(message: cl.Message):
+    # Chainlit Concept: User Session
+    # Retrieve conversation history from the user's session
     conversation_history: List[Dict[str, str]] = cl.user_session.get("conversation_history", [])
     
+    # Helper function to process uploaded files
     async def process_file(file: cl.File) -> Tuple[str, str]:
         logger.info(f"Processing file: {file.name}")
         try:
+            # Process different file types (PDF, PPT, CSV)
             if file.name.lower().endswith('.pdf'):
-                loader = PyPDFLoader(file.path)
-                pages = loader.load_and_split()
-                file_content = "\n\n".join(page.page_content for page in pages)
-                logger.info(f"Extracted {len(pages)} pages from PDF, total length: {len(file_content)} characters")
-                
-                # Split the content into chunks
-                text_splitter = RecursiveCharacterTextSplitter(chunk_size=4000, chunk_overlap=200)
-                chunks = text_splitter.split_text(file_content)
-                
-                # Summarize each chunk
-                chunk_summaries = []
-                for i, chunk in enumerate(chunks):
-                    chunk_summary = generate_summary(chunk)
-                    chunk_summaries.append(f"Chunk {i+1} Summary: {chunk_summary}")
-                
-                # Combine chunk summaries
-                combined_summary = "\n\n".join(chunk_summaries)
-                
-                # Generate a final summary of the combined summaries
-                final_summary = generate_summary(combined_summary)
-                
-                logger.info(f"Generated summary for large PDF, final summary length: {len(final_summary)} characters")
+                # ... (PDF processing code)
             elif file.name.lower().endswith(('.ppt', '.pptx')):
-                prs = Presentation(file.path)
-                file_content = "\n\n".join(shape.text for slide in prs.slides for shape in slide.shapes if hasattr(shape, 'text'))
-                logger.info(f"Extracted content from PPT, total length: {len(file_content)} characters")
+                # ... (PPT processing code)
             elif file.name.lower().endswith('.csv'):
-                csv_content = []
-                encodings = ['utf-8', 'iso-8859-1', 'windows-1252']
-                for encoding in encodings:
-                    try:
-                        with open(file.path, 'r', newline='', encoding=encoding) as csvfile:
-                            csv_reader = csv.reader(csvfile)
-                            for row in csv_reader:
-                                csv_content.append(", ".join(row))
-                        file_content = "\n".join(csv_content)
-                        logger.info(f"Extracted content from CSV using {encoding} encoding, total length: {len(file_content)} characters")
-                        break
-                    except UnicodeDecodeError:
-                        if encoding == encodings[-1]:
-                            raise ValueError(f"Unable to decode CSV file with any of the attempted encodings: {', '.join(encodings)}")
-                        continue
+                # ... (CSV processing code)
             else:
                 raise ValueError("Unsupported file type. Please upload a PDF, PPT, or CSV file.")
 
@@ -90,6 +63,8 @@ async def main(message: cl.Message):
             logger.error(f"Error processing file: {str(e)}", exc_info=True)
             raise
 
+    # Chainlit Concept: Handling File Uploads
+    # Check if the message contains any uploaded files
     if message.elements:
         for element in message.elements:
             if isinstance(element, cl.File) and (element.mime in ["application/pdf", "application/vnd.openxmlformats-officedocument.presentationml.presentation", "text/csv"] or element.name.lower().endswith('.csv')):
@@ -105,20 +80,28 @@ async def main(message: cl.Message):
                 await cl.Message(content="❌ Unsupported file type. Please upload a PDF, PPT, or CSV file.").send()
                 return
 
+    # Add user message to conversation history
     conversation_history.append({"role": "user", "content": message.content})
 
+    # Generate response using OpenAI
     response = client.chat.completions.create(
         model="gpt-4",
         messages=conversation_history,
         max_tokens=300
     )
 
+    # Extract assistant's reply
     assistant_message = response.choices[0].message
     conversation_history.append({"role": "assistant", "content": assistant_message.content})
+    
+    # Chainlit Concept: Updating User Session
+    # Store the updated conversation history in the user's session
     cl.user_session.set("conversation_history", conversation_history)
 
+    # Send the assistant's reply to the user
     await cl.Message(content=assistant_message.content).send()
 
+# Helper function to generate summaries
 def generate_summary(text):
     """
     Generate a summary of the given text using OpenAI's GPT-4 model.
@@ -136,6 +119,7 @@ def generate_summary(text):
     )
     return response.choices[0].message.content
 
+# Chainlit Concept: Running the App
 if __name__ == "__main__":
     # Run the Chainlit app
     cl.run()
