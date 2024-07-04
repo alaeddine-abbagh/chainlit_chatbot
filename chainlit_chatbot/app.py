@@ -16,45 +16,19 @@ load_dotenv()
 # Initialize OpenAI client with API key from environment variables
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# Custom CSS to make the app more visually appealing
-custom_css = """
-<style>
-    .chat-message { 
-        border-radius: 10px; 
-        padding: 10px; 
-        margin-bottom: 10px; 
-        max-width: 80%;
-    }
-    .user-message { 
-        background-color: #e6f3ff; 
-        align-self: flex-end; 
-    }
-    .assistant-message { 
-        background-color: #f0f0f0; 
-        align-self: flex-start; 
-    }
-</style>
-"""
-
 @cl.on_chat_start
 async def start():
     # Initialize an empty conversation history when a new chat starts
     cl.user_session.set("conversation_history", [])
     
     # Set the logo for the chat interface
-    await cl.set_chat_profiles([
-        cl.ChatProfile(
-            name="AI Assistant",
-            image="https://img.freepik.com/vecteurs-libre/vecteur-degrade-logo-colore-oiseau_343694-1365.jpg?size=626&ext=jpg",  # Replace with your actual logo URL
-            markdown_description="I'm your sophisticated AI assistant, ready to help with various tasks!"
-        )
-    ])
+    await cl.set_page_config(
+        page_title="AI Assistant",
+        page_icon="https://img.freepik.com/vecteurs-libre/vecteur-degrade-logo-colore-oiseau_343694-1365.jpg?size=626&ext=jpg",
+    )
     
-    # Display a welcome message with custom CSS
-    await cl.Message(
-        content="Welcome to your sophisticated AI assistant! How can I help you today?",
-        elements=[cl.Text(name="custom_css", content=custom_css)]
-    ).send()
+    # Display a welcome message
+    await cl.Message(content="Welcome to your sophisticated AI assistant! How can I help you today?").send()
 
 
 @cl.on_message
@@ -110,9 +84,7 @@ async def main(message: cl.Message):
     conversation_history.append({"role": "assistant", "content": assistant_message.content})
     cl.user_session.set("conversation_history", conversation_history)
 
-    await cl.Message(content=assistant_message.content, elements=[
-        cl.Text(name="custom_css", content=custom_css)
-    ]).send()
+    await cl.Message(content=assistant_message.content).send()
 
 def generate_summary(text):
     """
