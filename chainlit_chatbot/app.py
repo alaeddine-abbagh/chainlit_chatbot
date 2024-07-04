@@ -27,7 +27,10 @@ async def main(message: cl.Message):
             if isinstance(element, cl.File):
                 file = element
                 print(f"File MIME type: {file.mime}")
-                print(f"File size: {len(file.content)} bytes")
+                if file.content:
+                    print(f"File size: {len(file.content)} bytes")
+                else:
+                    print("File content is empty")
                 
                 try:
                     if file.mime == "application/pdf":
