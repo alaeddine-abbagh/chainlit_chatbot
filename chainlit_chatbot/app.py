@@ -2,7 +2,7 @@ import os
 import chainlit as cl
 from openai import OpenAI
 from dotenv import load_dotenv
-import PyPDF2
+import pdfplumber
 import io
 
 # Load environment variables
@@ -35,14 +35,17 @@ async def main(message: cl.Message):
                             await cl.Message(content="The uploaded PDF file appears to be empty.").send()
                             return
                         
-                        pdf_reader = PyPDF2.PdfReader(io.BytesIO(file.content))
-                        print(f"Number of pages in PDF: {len(pdf_reader.pages)}")
-                        
                         file_content = ""
-                        for i, page in enumerate(pdf_reader.pages):
-                            page_text = page.extract_text() or ""
-                            file_content += page_text + "\n\n"
-                            print(f"Page {i+1} extracted text length: {len(page_text)} characters")
+                        try:
+                            with pdfplumber.open(io.BytesIO(file.content)) as pdf:
+                                print(f"Number of pages in PDF: {len(pdf.pages)}")
+                                for i, page in enumerate(pdf.pages):
+                                    page_text = page.extract_text() or ""
+                                    file_content += page_text + "\n\n"
+                                    print(f"Page {i+1} extracted text length: {len(page_text)} characters")
+                        except Exception as e:
+                            await cl.Message(content=f"An error occurred while processing the PDF: {str(e)}").send()
+                            return
                         
                         if not file_content.strip():
                             await cl.Message(content="No text could be extracted from the PDF. It might be scanned or contain only images.").send()
