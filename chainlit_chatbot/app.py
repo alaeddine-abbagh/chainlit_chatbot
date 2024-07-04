@@ -45,7 +45,8 @@ async def start():
     await cl.set_chat_profiles([
         cl.ChatProfile(
             name="AI Assistant",
-            image="https://img.freepik.com/vecteurs-libre/vecteur-degrade-logo-colore-oiseau_343694-1365.jpg?size=626&ext=jpg"  # Replace with your actual logo URL
+            image="https://img.freepik.com/vecteurs-libre/vecteur-degrade-logo-colore-oiseau_343694-1365.jpg?size=626&ext=jpg",  # Replace with your actual logo URL
+            markdown_description="I'm your sophisticated AI assistant, ready to help with various tasks!"
         )
     ])
     
