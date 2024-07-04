@@ -46,12 +46,20 @@ async def main(message: cl.Message):
                 logger.info(f"Extracted content from PPT, total length: {len(file_content)} characters")
             elif file.name.lower().endswith('.csv'):
                 csv_content = []
-                with open(file.path, 'r', newline='', encoding='utf-8') as csvfile:
-                    csv_reader = csv.reader(csvfile)
-                    for row in csv_reader:
-                        csv_content.append(", ".join(row))
-                file_content = "\n".join(csv_content)
-                logger.info(f"Extracted content from CSV, total length: {len(file_content)} characters")
+                encodings = ['utf-8', 'iso-8859-1', 'windows-1252']
+                for encoding in encodings:
+                    try:
+                        with open(file.path, 'r', newline='', encoding=encoding) as csvfile:
+                            csv_reader = csv.reader(csvfile)
+                            for row in csv_reader:
+                                csv_content.append(", ".join(row))
+                        file_content = "\n".join(csv_content)
+                        logger.info(f"Extracted content from CSV using {encoding} encoding, total length: {len(file_content)} characters")
+                        break
+                    except UnicodeDecodeError:
+                        if encoding == encodings[-1]:
+                            raise ValueError(f"Unable to decode CSV file with any of the attempted encodings: {', '.join(encodings)}")
+                        continue
             else:
                 raise ValueError("Unsupported file type. Please upload a PDF, PPT, or CSV file.")
 
