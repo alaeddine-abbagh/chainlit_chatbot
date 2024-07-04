@@ -82,6 +82,4 @@ class CubeAntsAnimation(ThreeDScene):
         end_index = min(range(len(vertices)), key=lambda i: np.linalg.norm(end.get_center() - vertices[i]))
         return [start_index, end_index]
 
-if __name__ == "__main__":
-    scene = CubeAntsAnimation()
-    scene.render()
+# The file now ends here, removing the if __name__ == "__main__": block
