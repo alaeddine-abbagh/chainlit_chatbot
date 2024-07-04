@@ -21,12 +21,6 @@ async def start():
     # Initialize an empty conversation history when a new chat starts
     cl.user_session.set("conversation_history", [])
     
-    # Set the logo for the chat interface
-    await cl.set_page_config(
-        page_title="AI Assistant",
-        page_icon="https://img.freepik.com/vecteurs-libre/vecteur-degrade-logo-colore-oiseau_343694-1365.jpg?size=626&ext=jpg",
-    )
-    
     # Display a welcome message
     await cl.Message(content="Welcome to your AI assistant! How can I help you today?").send()
 

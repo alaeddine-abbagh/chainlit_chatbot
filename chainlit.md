@@ -1,5 +1,8 @@
 # Welcome to Your Sophisticated AI Assistant 🚀
 
+page_title: "AI Assistant"
+page_icon: "https://img.freepik.com/vecteurs-libre/vecteur-degrade-logo-colore-oiseau_343694-1365.jpg?size=626&ext=jpg"
+
 ## Introduction
 This AI assistant is powered by advanced language models and is designed to help you with a wide range of tasks, from answering questions to analyzing documents.
 
