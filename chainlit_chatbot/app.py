@@ -52,7 +52,7 @@ async def start():
     # Display a welcome message with custom CSS
     await cl.Message(
         content="Welcome to your sophisticated AI assistant! How can I help you today?",
-        elements=[cl.Text(name="custom_css", content=custom_css, display="none")]
+        elements=[cl.Text(name="custom_css", content=custom_css)]
     ).send()
 
 
@@ -110,7 +110,7 @@ async def main(message: cl.Message):
     cl.user_session.set("conversation_history", conversation_history)
 
     await cl.Message(content=assistant_message.content, elements=[
-        cl.Text(name="custom_css", content=custom_css, display="none")
+        cl.Text(name="custom_css", content=custom_css)
     ]).send()
 
 def generate_summary(text):
