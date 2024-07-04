@@ -7,7 +7,8 @@ from pptx import Presentation
 import csv
 import io
 import logging
-from typing import List, Dict
+from typing import List, Dict, Tuple
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 
 # Set up logging for debugging purposes
 logging.basicConfig(level=logging.DEBUG)
@@ -32,7 +33,7 @@ async def start():
 async def main(message: cl.Message):
     conversation_history: List[Dict[str, str]] = cl.user_session.get("conversation_history", [])
     
-    async def process_file(file: cl.File) -> str:
+    async def process_file(file: cl.File) -> Tuple[str, str]:
         logger.info(f"Processing file: {file.name}")
         try:
             if file.name.lower().endswith('.pdf'):
@@ -40,6 +41,24 @@ async def main(message: cl.Message):
                 pages = loader.load_and_split()
                 file_content = "\n\n".join(page.page_content for page in pages)
                 logger.info(f"Extracted {len(pages)} pages from PDF, total length: {len(file_content)} characters")
+                
+                # Split the content into chunks
+                text_splitter = RecursiveCharacterTextSplitter(chunk_size=4000, chunk_overlap=200)
+                chunks = text_splitter.split_text(file_content)
+                
+                # Summarize each chunk
+                chunk_summaries = []
+                for i, chunk in enumerate(chunks):
+                    chunk_summary = generate_summary(chunk)
+                    chunk_summaries.append(f"Chunk {i+1} Summary: {chunk_summary}")
+                
+                # Combine chunk summaries
+                combined_summary = "\n\n".join(chunk_summaries)
+                
+                # Generate a final summary of the combined summaries
+                final_summary = generate_summary(combined_summary)
+                
+                logger.info(f"Generated summary for large PDF, final summary length: {len(final_summary)} characters")
             elif file.name.lower().endswith(('.ppt', '.pptx')):
                 prs = Presentation(file.path)
                 file_content = "\n\n".join(shape.text for slide in prs.slides for shape in slide.shapes if hasattr(shape, 'text'))
@@ -75,8 +94,7 @@ async def main(message: cl.Message):
         for element in message.elements:
             if isinstance(element, cl.File) and (element.mime in ["application/pdf", "application/vnd.openxmlformats-officedocument.presentationml.presentation", "text/csv"] or element.name.lower().endswith('.csv')):
                 try:
-                    file_content = await process_file(element)
-                    summary = generate_summary(file_content)
+                    file_content, summary = await process_file(element)
                     file_type = "PDF" if element.mime == "application/pdf" else "PPT" if element.mime == "application/vnd.openxmlformats-officedocument.presentationml.presentation" else "CSV"
                     conversation_history.append({"role": "system", "content": f"{file_type} Content: {file_content}\n\nSummary: {summary}"})
                     await cl.Message(content=f"📄 File '{element.name}' processed. Here's a summary:\n\n{summary}\n\nYou can now ask questions about this document.").send()
