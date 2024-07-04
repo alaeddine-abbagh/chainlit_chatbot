@@ -47,18 +47,57 @@ async def main(message: cl.Message):
         try:
             # Process different file types (PDF, PPT, CSV)
             if file.name.lower().endswith('.pdf'):
-                # ... (PDF processing code)
+                loader = PyPDFLoader(file.path)
+                pages = loader.load_and_split()
+                file_content = "\n\n".join(page.page_content for page in pages)
+                logger.info(f"Extracted {len(pages)} pages from PDF, total length: {len(file_content)} characters")
+                
+                # Split the content into chunks
+                text_splitter = RecursiveCharacterTextSplitter(chunk_size=4000, chunk_overlap=200)
+                chunks = text_splitter.split_text(file_content)
+                
+                # Summarize each chunk
+                chunk_summaries = []
+                for i, chunk in enumerate(chunks):
+                    chunk_summary = generate_summary(chunk)
+                    chunk_summaries.append(f"Chunk {i+1} Summary: {chunk_summary}")
+                
+                # Combine chunk summaries
+                combined_summary = "\n\n".join(chunk_summaries)
+                
+                # Generate a final summary of the combined summaries
+                final_summary = generate_summary(combined_summary)
+                
+                logger.info(f"Generated summary for large PDF, final summary length: {len(final_summary)} characters")
             elif file.name.lower().endswith(('.ppt', '.pptx')):
-                # ... (PPT processing code)
+                prs = Presentation(file.path)
+                file_content = "\n\n".join(shape.text for slide in prs.slides for shape in slide.shapes if hasattr(shape, 'text'))
+                logger.info(f"Extracted content from PPT, total length: {len(file_content)} characters")
+                final_summary = generate_summary(file_content)
             elif file.name.lower().endswith('.csv'):
-                # ... (CSV processing code)
+                csv_content = []
+                encodings = ['utf-8', 'iso-8859-1', 'windows-1252']
+                for encoding in encodings:
+                    try:
+                        with open(file.path, 'r', newline='', encoding=encoding) as csvfile:
+                            csv_reader = csv.reader(csvfile)
+                            for row in csv_reader:
+                                csv_content.append(", ".join(row))
+                        file_content = "\n".join(csv_content)
+                        logger.info(f"Extracted content from CSV using {encoding} encoding, total length: {len(file_content)} characters")
+                        break
+                    except UnicodeDecodeError:
+                        if encoding == encodings[-1]:
+                            raise ValueError(f"Unable to decode CSV file with any of the attempted encodings: {', '.join(encodings)}")
+                        continue
+                final_summary = generate_summary(file_content)
             else:
                 raise ValueError("Unsupported file type. Please upload a PDF, PPT, or CSV file.")
 
             if not file_content.strip():
                 raise ValueError("No content could be extracted from the file.")
         
-            return file_content
+            return file_content, final_summary
         except Exception as e:
             logger.error(f"Error processing file: {str(e)}", exc_info=True)
             raise
