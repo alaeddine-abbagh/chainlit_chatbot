@@ -34,29 +34,15 @@ async def main(message: cl.Message):
             if isinstance(element, cl.File):
                 file = element
                 print(f"File MIME type: {file.mime}")
-                if file.content:
-                    logger.info(f"File size: {len(file.content)} bytes")
-                else:
-                    logger.warning("File content is empty")
+                logger.info(f"File path: {file.path}")
                 
                 try:
                     # Process PDF files
                     if file.mime == "application/pdf":
-                        if not file.content:
-                            logger.error("The uploaded PDF file appears to be empty.")
-                            await cl.Message(content="The uploaded PDF file appears to be empty.").send()
-                            return
-                        
                         file_content = ""
                         try:
-                            # Create a temporary file to store the PDF content
-                            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
-                                temp_file.write(file.content)
-                                temp_file_path = temp_file.name
-                            logger.info(f"Temporary file created: {temp_file_path}")
-
-                            # Use PyPDFLoader to extract text from the PDF
-                            loader = PyPDFLoader(temp_file_path)
+                            # Use PyPDFLoader to extract text from the PDF using its path
+                            loader = PyPDFLoader(file.path)
                             pages = loader.load_and_split()
                             
                             logger.info(f"Number of pages in PDF: {len(pages)}")
