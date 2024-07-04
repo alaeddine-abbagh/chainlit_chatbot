@@ -31,23 +31,33 @@ async def main(message: cl.Message):
                     if file.mime == "text/plain":
                         file_content = file.content.decode("utf-8")
                     elif file.mime == "application/pdf":
-                        # Check if file content is empty
-                        pdf_content = file.content
-                        pdf_reader = PyPDF2.PdfReader(io.BytesIO(pdf_content))
-                        text_content = ""
-                        for page in pdf_reader.pages:
-                            text_content += page.extract_text() + "\n\n"
-
+                        # Debug: Print file size
+                        print(f"PDF file size: {len(file.content)} bytes")
+                        
                         if not file.content:
                             await cl.Message(content="The uploaded PDF file appears to be empty.").send()
                             return
                         
-                                                
-                                              
+                        pdf_content = file.content
+                        pdf_reader = PyPDF2.PdfReader(io.BytesIO(pdf_content))
+                        
+                        # Debug: Print number of pages
+                        print(f"Number of pages in PDF: {len(pdf_reader.pages)}")
+                        
+                        file_content = ""
+                        for page in pdf_reader.pages:
+                            page_text = page.extract_text()
+                            file_content += page_text + "\n\n"
+                            # Debug: Print length of extracted text for each page
+                            print(f"Extracted text length for page: {len(page_text)} characters")
+                        
                         # Check if extracted content is empty
                         if not file_content.strip():
                             await cl.Message(content="No text could be extracted from the PDF. It might be scanned or contain only images.").send()
                             return
+                        
+                        # Debug: Print total extracted text length
+                        print(f"Total extracted text length: {len(file_content)} characters")
                     else:
                         await cl.Message(content=f"Unsupported file type: {file.mime}").send()
                         return
