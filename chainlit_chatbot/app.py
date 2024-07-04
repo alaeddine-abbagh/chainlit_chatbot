@@ -19,37 +19,31 @@ async def start():
 @cl.on_message
 async def main(message: cl.Message):
     conversation_history = cl.user_session.get("conversation_history")
-
+    files = None
+ 
     # Check if a file was uploaded
     if message.elements:
         for element in message.elements:
             if isinstance(element, cl.File):
                 file = element
+                print(file.mime)
                 try:
                     if file.mime == "text/plain":
                         file_content = file.content.decode("utf-8")
                     elif file.mime == "application/pdf":
                         # Check if file content is empty
+                        pdf_content = file.content
+                        pdf_reader = PyPDF2.PdfReader(io.BytesIO(pdf_content))
+                        text_content = ""
+                        for page in pdf_reader.pages:
+                            text_content += page.extract_text() + "\n\n"
+
                         if not file.content:
                             await cl.Message(content="The uploaded PDF file appears to be empty.").send()
                             return
                         
-                        pdf_reader = PyPDF2.PdfReader(io.BytesIO(file.content))
-                        file_content = ""
-                        for page in pdf_reader.pages:
-                            page_content = page.extract_text()
-                            if page_content:
-                                file_content += page_content + "\n\n"  # Add newlines between pages
-                        
-                        if not file_content.strip():
-                            # If no text was extracted, try reading it as a scanned PDF
-                            import pytesseract
-                            from pdf2image import convert_from_bytes
-                            
-                            images = convert_from_bytes(file.content)
-                            for image in images:
-                                file_content += pytesseract.image_to_string(image) + "\n\n"
-                        
+                                                
+                                              
                         # Check if extracted content is empty
                         if not file_content.strip():
                             await cl.Message(content="No text could be extracted from the PDF. It might be scanned or contain only images.").send()
