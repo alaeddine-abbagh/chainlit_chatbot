@@ -3,8 +3,8 @@ import chainlit as cl
 from openai import OpenAI
 from dotenv import load_dotenv
 from langchain.document_loaders import PyPDFLoader
-import tempfile
 import logging
+from typing import List, Dict
 
 # Set up logging for debugging purposes
 logging.basicConfig(level=logging.DEBUG)
@@ -16,103 +16,102 @@ load_dotenv()
 # Initialize OpenAI client with API key from environment variables
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+# Custom CSS to make the app more visually appealing
+custom_css = """
+<style>
+    .chat-message { 
+        border-radius: 10px; 
+        padding: 10px; 
+        margin-bottom: 10px; 
+        max-width: 80%;
+    }
+    .user-message { 
+        background-color: #e6f3ff; 
+        align-self: flex-end; 
+    }
+    .assistant-message { 
+        background-color: #f0f0f0; 
+        align-self: flex-start; 
+    }
+</style>
+"""
+
 @cl.on_chat_start
 async def start():
     # Initialize an empty conversation history when a new chat starts
     cl.user_session.set("conversation_history", [])
+    
+    # Set the logo for the chat interface
+    await cl.set_chat_profiles([
+        cl.ChatProfile(
+            name="AI Assistant",
+            image="https://your-logo-url.com/logo.png"  # Replace with your actual logo URL
+        )
+    ])
+    
+    # Display a welcome message with custom CSS
+    await cl.Message(
+        content="Welcome to your sophisticated AI assistant! How can I help you today?",
+        elements=[cl.Text(name="custom_css", content=custom_css, display="none")]
+    ).send()
 
 
 @cl.on_message
 async def main(message: cl.Message):
-    # Retrieve the conversation history from the user session
-    conversation_history = cl.user_session.get("conversation_history")
-    files = None  # Initialize files variable (not used in current implementation)
- 
-    # Check if a file was uploaded with the message
+    conversation_history: List[Dict[str, str]] = cl.user_session.get("conversation_history", [])
+    
+    async def process_pdf(file: cl.File) -> str:
+        logger.info(f"Processing PDF file: {file.name}")
+        try:
+            loader = PyPDFLoader(file.path)
+            pages = loader.load_and_split()
+            
+            file_content = "\n\n".join(page.page_content for page in pages)
+            logger.info(f"Extracted {len(pages)} pages, total length: {len(file_content)} characters")
+            
+            if not file_content.strip():
+                raise ValueError("No text could be extracted from the PDF.")
+            
+            summary_prompt = f"Summarize the following text from a PDF (max 150 words):\n\n{file_content[:4000]}"
+            summary_response = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[{"role": "user", "content": summary_prompt}],
+                max_tokens=200
+            )
+            return summary_response.choices[0].message.content
+        except Exception as e:
+            logger.error(f"Error processing PDF: {str(e)}", exc_info=True)
+            raise
+
     if message.elements:
         for element in message.elements:
-            if isinstance(element, cl.File):
-                file = element
-                print(f"File MIME type: {file.mime}")
-                logger.info(f"File path: {file.path}")
-                
+            if isinstance(element, cl.File) and element.mime == "application/pdf":
                 try:
-                    # Process PDF files
-                    if file.mime == "application/pdf":
-                        file_content = ""
-                        try:
-                            # Use PyPDFLoader to extract text from the PDF using its path
-                            loader = PyPDFLoader(file.path)
-                            pages = loader.load_and_split()
-                            
-                            logger.info(f"Number of pages in PDF: {len(pages)}")
-                            for i, page in enumerate(pages):
-                                file_content += page.page_content + "\n\n"
-                                logger.info(f"Page {i+1} extracted text length: {len(page.page_content)} characters")
-                        except Exception as e:
-                            logger.error(f"An error occurred while processing the PDF: {str(e)}", exc_info=True)
-                            await cl.Message(content=f"An error occurred while processing the PDF: {str(e)}").send()
-                            return
-                        
-                        if not file_content.strip():
-                            logger.warning("No text could be extracted from the PDF. It might be scanned or contain only images.")
-                            await cl.Message(content="No text could be extracted from the PDF. It might be scanned or contain only images.").send()
-                            return
-                        
-                        logger.info(f"Total extracted text length: {len(file_content)} characters")
-                        
-                        # Summarize file content using OpenAI's GPT-3.5-turbo
-                        summary_prompt = f"Summarize the following text from a PDF (max 150 words):\n\n{file_content[:4000]}"
-                        summary_response = client.chat.completions.create(
-                            model="gpt-3.5-turbo",
-                            messages=[{"role": "user", "content": summary_prompt}],
-                            max_tokens=200
-                        )
-                        summary = summary_response.choices[0].message.content
-                        
-                        # Add file summary to conversation history
-                        conversation_history.append({"role": "system", "content": f"PDF Summary: {summary}"})
-                        cl.user_session.set("conversation_history", conversation_history)
-                        
-                        await cl.Message(content=f"File '{file.name}' has been processed. Here's a summary:\n\n{summary}").send()
-                        return
-                    else:
-                        await cl.Message(content=f"Unsupported file type: {file.mime}. Please upload a PDF file.").send()
-                        return
+                    summary = await process_pdf(element)
+                    conversation_history.append({"role": "system", "content": f"PDF Summary: {summary}"})
+                    await cl.Message(content=f"📄 File '{element.name}' processed. Here's a summary:\n\n{summary}").send()
                 except Exception as e:
-                    await cl.Message(content=f"An error occurred while processing the file: {str(e)}").send()
-                    return
+                    await cl.Message(content=f"❌ Error processing file: {str(e)}").send()
+                return
+            else:
+                await cl.Message(content="❌ Unsupported file type. Please upload a PDF file.").send()
+                return
 
-            # This block is unreachable in the current implementation
-            # Summarize file content
-            summary = generate_summary(file_content)
-            
-            # Add file summary to conversation history
-            conversation_history.append({"role": "system", "content": f"The user has uploaded a file. Here's a summary of its content:\n\n{summary}"})
-            cl.user_session.set("conversation_history", conversation_history)
-            
-            await cl.Message(content=f"File '{file.name}' has been uploaded and summarized. Here's a summary:\n\n{summary}\n\nYou can now ask questions about its content.").send()
-            return
-
-    # If no file was uploaded, process the user's message
     conversation_history.append({"role": "user", "content": message.content})
 
-    # Generate response using OpenAI's GPT-4
     response = client.chat.completions.create(
         model="gpt-4",
         messages=conversation_history,
-        max_tokens=150
+        max_tokens=300
     )
 
-    # Extract the assistant's message from the response
     assistant_message = response.choices[0].message
-    # Add the assistant's response to the conversation history
     conversation_history.append({"role": "assistant", "content": assistant_message.content})
-    # Update the conversation history in the user session
     cl.user_session.set("conversation_history", conversation_history)
 
-    # Send the assistant's response back to the user
-    await cl.Message(content=assistant_message.content).send()
+    await cl.Message(content=assistant_message.content, elements=[
+        cl.Text(name="custom_css", content=custom_css, display="none")
+    ]).send()
 
 def generate_summary(text):
     """
