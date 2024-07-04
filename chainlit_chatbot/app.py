@@ -29,10 +29,10 @@ async def main(message: cl.Message):
                 print(file.mime)
                 try:
                     if file.mime == "text/plain":
-                        file_content = file.content.decode("utf-8")
+                        file_content = file.content.decode("utf-8") if file.content else ""
                     elif file.mime == "application/pdf":
                         # Debug: Print file size
-                        print(f"PDF file size: {len(file.content)} bytes")
+                        print(f"PDF file size: {len(file.content) if file.content else 0} bytes")
                         
                         if not file.content:
                             await cl.Message(content="The uploaded PDF file appears to be empty.").send()
@@ -46,7 +46,7 @@ async def main(message: cl.Message):
                         
                         file_content = ""
                         for page in pdf_reader.pages:
-                            page_text = page.extract_text()
+                            page_text = page.extract_text() or ""
                             file_content += page_text + "\n\n"
                             # Debug: Print length of extracted text for each page
                             print(f"Extracted text length for page: {len(page_text)} characters")
