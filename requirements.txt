@@ -8,3 +8,4 @@ langchain
 pytesseract
 pdf2image
 python-pptx
+networkx
