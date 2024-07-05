@@ -77,14 +77,6 @@ class BinomialTheoremAnimation(Scene):
         for i in range(1, 5):
             self.play(FadeIn(pascal_triangle[i]), run_time=0.5)
             for j in range(1, i):
-                # Zoom in on the relevant part of the triangle
-                self.play(
-                    pascal_triangle.animate.scale(1.5).move_to(
-                        pascal_triangle[i][j].get_center() * -1
-                    ),
-                    run_time=0.5
-                )
-                
                 self.play(
                     Indicate(pascal_triangle[i-1][j-1], color=WHITE, scale_factor=1.4),
                     Indicate(pascal_triangle[i-1][j], color=WHITE, scale_factor=1.4),
@@ -100,12 +92,6 @@ class BinomialTheoremAnimation(Scene):
                     pascal_triangle[i-1][j].animate.set_color(colors[i-1]),
                     pascal_triangle[i][j].animate.set_color(colors[i]),
                     run_time=0.4
-                )
-                
-                # Zoom out to show the entire triangle
-                self.play(
-                    pascal_triangle.animate.scale(1/1.5).move_to(ORIGIN).to_edge(DOWN),
-                    run_time=0.5
                 )
 
         self.wait(1)
