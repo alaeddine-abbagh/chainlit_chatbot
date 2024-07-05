@@ -78,7 +78,7 @@ class CubeAntsAnimation(ThreeDScene):
             highlighted_edges = self.highlight_path(path, vertices)
             
             # Calculate distance
-            distance = self.calculate_path_distance(path)
+            distance = self.calculate_path_distance(path, vertices)
             distance_label = Text(f"Distance: {distance:.2f}", font_size=24).to_corner(UL)
             
             self.add(distance_label)
@@ -116,11 +116,11 @@ class CubeAntsAnimation(ThreeDScene):
             highlighted_edges.append(edge)
         return highlighted_edges
 
-    def calculate_path_distance(self, path: List[int]) -> float:
+    def calculate_path_distance(self, path: List[int], vertices: List[np.ndarray]) -> float:
         distance = 0
         for i in range(len(path) - 1):
-            start, end = self.graph.nodes[path[i]]['pos'], self.graph.nodes[path[i+1]]['pos']
-            distance += np.linalg.norm(np.array(end) - np.array(start))
+            start, end = vertices[path[i]], vertices[path[i+1]]
+            distance += np.linalg.norm(end - start)
         return distance
 
 # The file now ends here, removing the if __name__ == "__main__": block
