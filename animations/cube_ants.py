@@ -82,16 +82,19 @@ class CubeAntsAnimation(ThreeDScene):
             distance_label = Text(f"Distance: {distance:.2f}", font_size=24).to_corner(UL)
             
             self.add(distance_label)
-            self.play(*[Create(edge) for edge in highlighted_edges], run_time=2)
+            if highlighted_edges:
+                self.play(*[Create(edge) for edge in highlighted_edges], run_time=2)
             self.wait(1)
             
             # Reset for next iteration
-            self.play(
+            animations = [
                 ant1.animate.scale(1/1.5),
                 ant2.animate.scale(1/1.5),
-                *[FadeOut(edge) for edge in highlighted_edges],
                 FadeOut(distance_label)
-            )
+            ]
+            if highlighted_edges:
+                animations.extend([FadeOut(edge) for edge in highlighted_edges])
+            self.play(*animations)
             
             # Move ants to new random edge centers between iterations
             if _ == 0:
