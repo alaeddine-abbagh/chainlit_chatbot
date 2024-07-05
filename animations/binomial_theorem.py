@@ -54,9 +54,18 @@ class BinomialTheoremAnimation(Scene):
             self.play(FadeIn(pascal_triangle[i]))
             for j in range(1, i):
                 self.play(
-                    Indicate(pascal_triangle[i-1][j-1], color=ORANGE),
-                    Indicate(pascal_triangle[i-1][j], color=ORANGE),
-                    Indicate(pascal_triangle[i][j], color=ORANGE),
+                    pascal_triangle[i-1][j-1].animate.set_color(ORANGE),
+                    pascal_triangle[i-1][j].animate.set_color(ORANGE),
+                    run_time=0.5
+                )
+                self.play(
+                    pascal_triangle[i][j].animate.set_color(YELLOW),
+                    run_time=0.5
+                )
+                self.play(
+                    pascal_triangle[i-1][j-1].animate.set_color(colors[i-1]),
+                    pascal_triangle[i-1][j].animate.set_color(colors[i-1]),
+                    pascal_triangle[i][j].animate.set_color(colors[i]),
                     run_time=0.5
                 )
         self.wait(2)
