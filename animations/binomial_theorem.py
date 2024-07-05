@@ -68,7 +68,7 @@ class BinomialTheoremAnimation(Scene):
 
         # Text overlay for Pascal's Triangle
         pascal_text = Text("The easy way", font_size=36, color=GREEN)
-        pascal_text.next_to(general_form, DOWN)
+        pascal_text.next_to(general_form, 2*DOWN)
 
         # Animate Pascal's Triangle construction with faster pace
         self.play(FadeIn(pascal_text))
