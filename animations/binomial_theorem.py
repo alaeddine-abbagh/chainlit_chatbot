@@ -81,11 +81,11 @@ class BinomialTheoremAnimation(Scene):
         ).next_to(fourth_row, DOWN, buff=0.5)
 
         self.play(Write(expansion))
-        coefficient_indices = [3, 7, 11, 15, 19]  # Indices of the coefficients in the expansion
+        coefficient_indices = [7, 11, 16, 22, 27]  # Indices of the coefficients in the expansion
         for i, index in enumerate(coefficient_indices):
             self.play(
-                Indicate(fourth_row[i], color=ORANGE),
-                Indicate(expansion[0][index], color=ORANGE),
+                Indicate(fourth_row[i], color=ORANGE,scale_factor=1.5),
+                Indicate(expansion[0][index], color=ORANGE, scale_factor=1.5),
                 run_time=1
             )
         self.wait(2)
