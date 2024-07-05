@@ -73,9 +73,16 @@ class BinomialTheoremAnimation(Scene):
         # Animate Pascal's Triangle construction with faster pace
         self.play(FadeIn(pascal_text))
         self.play(FadeOut(pascal_text))
+        # Initial zoom out
+        self.play(pascal_triangle.animate.scale(0.7).to_edge(DOWN), run_time=1)
+
         self.play(FadeIn(pascal_triangle[0]))
         for i in range(1, 5):
             self.play(FadeIn(pascal_triangle[i]), run_time=0.5)
+            
+            # Zoom in for each new row
+            self.play(pascal_triangle.animate.scale(1.1).move_to(ORIGIN), run_time=0.5)
+            
             for j in range(1, i):
                 self.play(
                     Indicate(pascal_triangle[i-1][j-1], color=WHITE, scale_factor=1.4),
@@ -93,6 +100,13 @@ class BinomialTheoremAnimation(Scene):
                     pascal_triangle[i][j].animate.set_color(colors[i]),
                     run_time=0.4
                 )
+            
+            # Zoom out after completing each row
+            if i < 4:
+                self.play(pascal_triangle.animate.scale(0.9).to_edge(DOWN), run_time=0.5)
+
+        # Final zoom out to show the entire triangle
+        self.play(pascal_triangle.animate.scale(0.8).to_edge(DOWN), run_time=1)
         self.wait(1)
 
         # Relationship between coefficients and Pascal's Triangle
