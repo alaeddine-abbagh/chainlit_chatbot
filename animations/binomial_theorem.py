@@ -1,7 +1,10 @@
 from manim import *
+import os
 
 class BinomialTheoremAnimation(Scene):
     def construct(self):
+        # Load the pop sound
+        pop_sound = os.path.join(os.path.dirname(__file__), "pop_sound.wav")
         # # Set a gradient background
         # background = Rectangle(width=config.frame_width, height=config.frame_height, fill_opacity=1)
         # background.set_color(color=[BLUE_E, PURPLE_E])
@@ -79,6 +82,7 @@ class BinomialTheoremAnimation(Scene):
                     Indicate(pascal_triangle[i-1][j], color=WHITE, scale_factor=1.4),
                     run_time=0.4
                 )
+                self.add_sound(pop_sound)
                 self.play(
                     Indicate(pascal_triangle[i][j], color=PINK, scale_factor=1.8),
                     run_time=0.3
@@ -107,6 +111,7 @@ class BinomialTheoremAnimation(Scene):
         self.play(Write(expansion))
         coefficient_indices = [7, 11, 16, 22, 27]  # Indices of the coefficients in the expansion
         for i, index in enumerate(coefficient_indices):
+            self.add_sound(pop_sound)
             self.play(
                 Indicate(fourth_row[i], color=PINK, scale_factor=1.5),
                 Indicate(expansion[0][index], color=PINK, scale_factor=1.5),
