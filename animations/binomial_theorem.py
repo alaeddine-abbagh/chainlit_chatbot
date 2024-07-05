@@ -10,12 +10,26 @@ class BinomialTheoremAnimation(Scene):
 
         # General form of the Binomial Theorem
         general_form = MathTex(
-            r"(a + b)^n = C(n,0)a^n + C(n,1)a^{n-1}b + C(n,2)a^{n-2}b^2 + \cdots + C(n,n-1)ab^{n-1} + C(n,n)b^n",
-            font_size=36
-        ).scale(0.8)
+            r"(a + b)^n = \sum_{k=0}^n ", r"C_n^k", r"a^{n-k}b^k",
+            font_size=48
+        )
+        general_form[0].set_color(BLUE)
+        general_form[1].set_color(RED)
+        general_form[2].set_color(GREEN)
+        
         self.play(Write(general_form))
         self.wait(2)
         self.play(general_form.animate.to_edge(UP))
+
+        # Add explanation for C_n^k
+        explanation = MathTex(
+            r"C_n^k = \binom{n}{k} = \frac{n!}{k!(n-k)!}",
+            font_size=36
+        ).set_color(YELLOW)
+        explanation.next_to(general_form, DOWN, buff=0.5)
+        self.play(Write(explanation))
+        self.wait(2)
+        self.play(FadeOut(explanation))
 
         # Pascal's Triangle
         pascal_triangle = VGroup()
