@@ -90,30 +90,30 @@ class BinomialTheoremAnimation(Scene):
             )
         self.wait(2)
 
-        # Focus on n = 3 case
-        self.play(FadeOut(general_form, fourth_row, expansion))
+        # # Focus on n = 3 case
+        # self.play(FadeOut(general_form, fourth_row, expansion))
 
-        n3_case = MathTex(r"(a+b)^3", font_size=48)
-        self.play(Write(n3_case))
-        self.wait(1)
+        # n3_case = MathTex(r"(a+b)^3", font_size=48)
+        # self.play(Write(n3_case))
+        # self.wait(1)
 
-        expansion_steps = [
-            MathTex(r"(a+b)^3 &= (a+b)(a+b)^2"),
-            MathTex(r"&= (a+b)(a^2 + 2ab + b^2)"),
-            MathTex(r"&= a(a^2 + 2ab + b^2) + b(a^2 + 2ab + b^2)"),
-            MathTex(r"&= a^3 + 2a^2b + ab^2 + a^2b + 2ab^2 + b^3"),
-            MathTex(r"&= a^3 + 3a^2b + 3ab^2 + b^3")
-        ]
+        # expansion_steps = [
+        #     MathTex(r"(a+b)^3 &= (a+b)(a+b)^2"),
+        #     MathTex(r"&= (a+b)(a^2 + 2ab + b^2)"),
+        #     MathTex(r"&= a(a^2 + 2ab + b^2) + b(a^2 + 2ab + b^2)"),
+        #     MathTex(r"&= a^3 + 2a^2b + ab^2 + a^2b + 2ab^2 + b^3"),
+        #     MathTex(r"&= a^3 + 3a^2b + 3ab^2 + b^3")
+        # ]
 
-        for i, step in enumerate(expansion_steps):
-            step.next_to(n3_case, DOWN, buff=0.5)
-            if i == 0:
-                self.play(Write(step))
-            else:
-                self.play(ReplacementTransform(expansion_steps[i-1], step))
-            self.wait(1)
+        # for i, step in enumerate(expansion_steps):
+        #     step.next_to(n3_case, DOWN, buff=0.5)
+        #     if i == 0:
+        #         self.play(Write(step))
+        #     else:
+        #         self.play(ReplacementTransform(expansion_steps[i-1], step))
+        #     self.wait(1)
 
-        self.wait(2)
+        # self.wait(2)
 
 if __name__ == "__main__":
     from manim import config
