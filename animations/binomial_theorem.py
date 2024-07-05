@@ -112,7 +112,7 @@ class BinomialTheoremAnimation(MovingCameraScene):
         # Relationship between coefficients and Pascal's Triangle
         self.play(FadeOut(pascal_triangle[0], pascal_triangle[1], pascal_triangle[2], pascal_triangle[3]))
         fourth_row = pascal_triangle[4]
-        self.play(fourth_row.animate.scale(1.5).next_to(general_form, 1.2*DOWN, buff=1))
+        self.play(fourth_row.animate.scale(2).next_to(general_form, 1.5*DOWN, buff=1))
 
         expansion = MathTex(
             r"(a+b)^4 = 1a^4 + 4a^3b + 6a^2b^2 + 4ab^3 + 1b^4",
