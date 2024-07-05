@@ -34,10 +34,14 @@ class CubeAntsAnimation(ThreeDScene):
         ant_colors = [RED, BLUE, GREEN, YELLOW, PURPLE, ORANGE, PINK, TEAL]
         ants = VGroup(*[
             Sphere(radius=0.15, fill_color=color, fill_opacity=0.8, stroke_width=0)
-            .move_to(vertex)
             .add(Sphere(radius=0.2, fill_color=color, fill_opacity=0.3, stroke_width=0))  # Add glow effect
-            for vertex, color in zip(vertices, ant_colors)
+            for color in ant_colors
         ])
+        
+        # Place ants on random edges
+        for ant in ants:
+            edge = random.choice(cube.edges)
+            ant.move_to(edge.get_center())
         
         # Add cube to the scene
         self.set_camera_orientation(phi=75 * DEGREES, theta=30 * DEGREES)
@@ -51,52 +55,42 @@ class CubeAntsAnimation(ThreeDScene):
         self.play(FadeIn(ants))
         self.wait(1)
         
-        # Showcase the distance between two neighboring ants
-        for _ in range(3):
+        # Showcase the distance between two ants twice
+        for _ in range(2):
             # Select two random ants
             ant1, ant2 = random.sample(list(ants), 2)
-            ant1_center = tuple(ant1.get_center())
-            ant2_center = tuple(ant2.get_center())
             
-            # Find the indices of the ants in the vertices list
-            def find_closest_vertex(ant_center):
-                distances = [np.linalg.norm(np.array(v) - np.array(ant_center)) for v in vertices]
-                return distances.index(min(distances))
-        
-            ant1_index = find_closest_vertex(ant1_center)
-            ant2_index = find_closest_vertex(ant2_center)
+            # Highlight the selected ants
+            self.play(
+                ant1.animate.scale(1.5),
+                ant2.animate.scale(1.5)
+            )
             
-            # Check if the ants are neighbors
-            if (ant1_index, ant2_index) in edges or (ant2_index, ant1_index) in edges:
-                # Highlight the selected ants
-                self.play(
-                    ant1.animate.scale(1.5),
-                    ant2.animate.scale(1.5)
-                )
-                
-                # Highlight the edge between the ants
-                highlighted_edge = Line(ant1.get_center(), ant2.get_center(), color=YELLOW, stroke_width=5)
-                
-                # Calculate distance
-                pos1 = np.array(vertices[ant1_index])
-                pos2 = np.array(vertices[ant2_index])
-                distance = np.linalg.norm(pos1 - pos2)
-                distance_label = Text(f"Distance between neighbors: {distance:.2f}", font_size=24).to_corner(UL)
-                
-                self.add(distance_label)
-                self.play(Create(highlighted_edge), run_time=2)
-                self.wait(1)
-                
-                # Reset for next iteration
-                self.play(
-                    ant1.animate.scale(1/1.5),
-                    ant2.animate.scale(1/1.5),
-                    FadeOut(highlighted_edge),
-                    FadeOut(distance_label)
-                )
-            else:
-                # If the selected ants are not neighbors, try again
-                continue
+            # Highlight the edge between the ants
+            highlighted_edge = Line(ant1.get_center(), ant2.get_center(), color=YELLOW, stroke_width=5)
+            
+            # Calculate distance
+            distance = np.linalg.norm(ant1.get_center() - ant2.get_center())
+            distance_label = Text(f"Distance: {distance:.2f}", font_size=24).to_corner(UL)
+            
+            self.add(distance_label)
+            self.play(Create(highlighted_edge), run_time=2)
+            self.wait(1)
+            
+            # Reset for next iteration
+            self.play(
+                ant1.animate.scale(1/1.5),
+                ant2.animate.scale(1/1.5),
+                FadeOut(highlighted_edge),
+                FadeOut(distance_label)
+            )
+            
+            # Move ants to new random edges between iterations
+            if _ == 0:
+                self.play(*[
+                    ant.animate.move_to(random.choice(cube.edges).get_center())
+                    for ant in ants
+                ])
     
     # Remove unused methods
 
