@@ -112,7 +112,7 @@ class BinomialTheoremAnimation(MovingCameraScene):
         # Relationship between coefficients and Pascal's Triangle
         self.play(FadeOut(pascal_triangle[0], pascal_triangle[1], pascal_triangle[2], pascal_triangle[3]))
         fourth_row = pascal_triangle[4]
-        self.play(fourth_row.animate.next_to(general_form, DOWN, buff=1))
+        self.play(fourth_row.animate.scale(1.5).next_to(general_form, 1.2*DOWN, buff=1))
 
         expansion = MathTex(
             r"(a+b)^4 = 1a^4 + 4a^3b + 6a^2b^2 + 4ab^3 + 1b^4",
@@ -126,9 +126,10 @@ class BinomialTheoremAnimation(MovingCameraScene):
         coefficient_indices = [7, 11, 16, 22, 27]  # Indices of the coefficients in the expansion
         for i, index in enumerate(coefficient_indices):
             self.add_sound(pop_sound)
+            highlight_color = colors[i]  # Use the same color as in the Pascal's Triangle
             self.play(
-                Indicate(fourth_row[i], color=PINK, scale_factor=1.5),
-                Indicate(expansion[0][index], color=PINK, scale_factor=1.5),
+                fourth_row[i].animate.set_color(highlight_color),
+                expansion[0][index].animate.set_color(highlight_color),
                 run_time=0.6
             )
         self.wait(1)
