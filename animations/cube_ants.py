@@ -38,10 +38,14 @@ class CubeAntsAnimation(ThreeDScene):
             for color in ant_colors
         ])
         
-        # Place ants on random edges
+        # Calculate edge centers
+        edge_centers = [
+            (vertices[i] + vertices[j]) / 2 for i, j in edges
+        ]
+        
+        # Place ants on random edge centers
         for ant in ants:
-            edge = random.choice(cube.edges)
-            ant.move_to(edge.get_center())
+            ant.move_to(random.choice(edge_centers))
         
         # Add cube to the scene
         self.set_camera_orientation(phi=75 * DEGREES, theta=30 * DEGREES)
@@ -85,10 +89,10 @@ class CubeAntsAnimation(ThreeDScene):
                 FadeOut(distance_label)
             )
             
-            # Move ants to new random edges between iterations
+            # Move ants to new random edge centers between iterations
             if _ == 0:
                 self.play(*[
-                    ant.animate.move_to(random.choice(cube.edges).get_center())
+                    ant.animate.move_to(random.choice(edge_centers))
                     for ant in ants
                 ])
     
