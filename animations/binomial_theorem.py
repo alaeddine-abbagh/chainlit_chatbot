@@ -3,7 +3,7 @@ from manim import *
 class BinomialTheoremAnimation(Scene):
     def construct(self):
         # Set a gradient background
-        background = Rectangle(width=FRAME_WIDTH, height=FRAME_HEIGHT, fill_opacity=1)
+        background = Rectangle(width=config.frame_width, height=config.frame_height, fill_opacity=1)
         background.set_color(color=[BLUE_E, PURPLE_E])
         self.add(background)
 
