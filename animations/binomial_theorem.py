@@ -1,10 +1,13 @@
 from manim import *
 import os
 
-class BinomialTheoremAnimation(Scene):
+class BinomialTheoremAnimation(MovingCameraScene):
     def construct(self):
         # Load the pop sound
         pop_sound = os.path.join(os.path.dirname(__file__), "pop_sound.wav")
+        
+        # Set up the camera
+        self.camera.frame.save_state()
         # # Set a gradient background
         # background = Rectangle(width=config.frame_width, height=config.frame_height, fill_opacity=1)
         # background.set_color(color=[BLUE_E, PURPLE_E])
@@ -74,9 +77,16 @@ class BinomialTheoremAnimation(Scene):
         self.play(FadeIn(pascal_text))
         self.play(FadeOut(pascal_text))
         self.play(FadeIn(pascal_triangle[0]))
+        
         for i in range(1, 5):
             self.play(FadeIn(pascal_triangle[i]), run_time=0.5)
             for j in range(1, i):
+                # Zoom in on the relevant part of the triangle
+                self.play(
+                    self.camera.frame.animate.scale(0.7).move_to(pascal_triangle[i][j]),
+                    run_time=0.5
+                )
+                
                 self.play(
                     Indicate(pascal_triangle[i-1][j-1], color=WHITE, scale_factor=1.4),
                     Indicate(pascal_triangle[i-1][j], color=WHITE, scale_factor=1.4),
@@ -93,6 +103,9 @@ class BinomialTheoremAnimation(Scene):
                     pascal_triangle[i][j].animate.set_color(colors[i]),
                     run_time=0.4
                 )
+                
+                # Zoom out to show the entire triangle
+                self.play(Restore(self.camera.frame), run_time=0.5)
 
         self.wait(1)
 
