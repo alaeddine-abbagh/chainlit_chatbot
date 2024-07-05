@@ -1,6 +1,7 @@
 from manim import *
 import random
 import networkx as nx
+from typing import List, Tuple
 
 class CubeAntsAnimation(ThreeDScene):
     def construct(self):
@@ -70,22 +71,25 @@ class CubeAntsAnimation(ThreeDScene):
                 ant2.animate.scale(1.5)
             )
             
-            # Highlight the edge between the ants
-            highlighted_edge = Line(ant1.get_center(), ant2.get_center(), color=YELLOW, stroke_width=5)
+            # Find the shortest path between the ants
+            path = self.find_shortest_path(ant1, ant2, vertices, edge_centers)
+            
+            # Highlight the edges in the path
+            highlighted_edges = self.highlight_path(path, vertices)
             
             # Calculate distance
-            distance = np.linalg.norm(ant1.get_center() - ant2.get_center())
+            distance = self.calculate_path_distance(path)
             distance_label = Text(f"Distance: {distance:.2f}", font_size=24).to_corner(UL)
             
             self.add(distance_label)
-            self.play(Create(highlighted_edge), run_time=2)
+            self.play(*[Create(edge) for edge in highlighted_edges], run_time=2)
             self.wait(1)
             
             # Reset for next iteration
             self.play(
                 ant1.animate.scale(1/1.5),
                 ant2.animate.scale(1/1.5),
-                FadeOut(highlighted_edge),
+                *[FadeOut(edge) for edge in highlighted_edges],
                 FadeOut(distance_label)
             )
             
@@ -96,6 +100,27 @@ class CubeAntsAnimation(ThreeDScene):
                     for ant in ants
                 ])
     
-    # Remove unused methods
+    def find_shortest_path(self, ant1: Mobject, ant2: Mobject, vertices: List[np.ndarray], edge_centers: List[np.ndarray]) -> List[int]:
+        # Find the closest vertices to the ants
+        start = min(range(len(vertices)), key=lambda i: np.linalg.norm(ant1.get_center() - vertices[i]))
+        end = min(range(len(vertices)), key=lambda i: np.linalg.norm(ant2.get_center() - vertices[i]))
+        
+        # Find the shortest path using networkx
+        return nx.shortest_path(self.graph, start, end)
+
+    def highlight_path(self, path: List[int], vertices: List[np.ndarray]) -> List[Line]:
+        highlighted_edges = []
+        for i in range(len(path) - 1):
+            start, end = vertices[path[i]], vertices[path[i+1]]
+            edge = Line(start, end, color=YELLOW, stroke_width=5)
+            highlighted_edges.append(edge)
+        return highlighted_edges
+
+    def calculate_path_distance(self, path: List[int]) -> float:
+        distance = 0
+        for i in range(len(path) - 1):
+            start, end = self.graph.nodes[path[i]]['pos'], self.graph.nodes[path[i+1]]['pos']
+            distance += np.linalg.norm(np.array(end) - np.array(start))
+        return distance
 
 # The file now ends here, removing the if __name__ == "__main__": block
