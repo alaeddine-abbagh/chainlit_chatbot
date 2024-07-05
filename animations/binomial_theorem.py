@@ -2,10 +2,10 @@ from manim import *
 
 class BinomialTheoremAnimation(Scene):
     def construct(self):
-        # Set a gradient background
-        background = Rectangle(width=config.frame_width, height=config.frame_height, fill_opacity=1)
-        background.set_color(color=[BLUE_E, PURPLE_E])
-        self.add(background)
+        # # Set a gradient background
+        # background = Rectangle(width=config.frame_width, height=config.frame_height, fill_opacity=1)
+        # background.set_color(color=[BLUE_E, PURPLE_E])
+        # self.add(background)
 
         # Title screen with animated text
         title = Text("The Binomial Theorem", font_size=72, color=YELLOW)
@@ -33,15 +33,17 @@ class BinomialTheoremAnimation(Scene):
             r"C_n^k = \binom{n}{k} = \frac{n!}{k!(n-k)!}",
             font_size=48
         ).set_color(YELLOW)
-        explanation.next_to(general_form, DOWN, buff=0.5)
+        explanation.next_to(general_form, 3*DOWN, buff=0.5)
+
+        text_overlay = Text("The hard way", font_size=36, color=RED)
+        text_overlay.next_to(explanation, 1.5*DOWN)
+        self.play(FadeIn(text_overlay))
+        self.wait(1)
         self.play(Write(explanation, run_time=1.5))
         self.wait(1)
         
         # Add text overlay
-        text_overlay = Text("Binomial Coefficient", font_size=36, color=WHITE)
-        text_overlay.next_to(explanation, DOWN)
-        self.play(FadeIn(text_overlay))
-        self.wait(1)
+       
         self.play(FadeOut(explanation), FadeOut(text_overlay))
 
         # Pascal's Triangle with more vibrant colors
@@ -62,11 +64,12 @@ class BinomialTheoremAnimation(Scene):
         pascal_triangle.next_to(general_form, DOWN, buff=0.7)
 
         # Text overlay for Pascal's Triangle
-        pascal_text = Text("Pascal's Triangle", font_size=36, color=WHITE)
-        pascal_text.next_to(pascal_triangle, UP)
+        pascal_text = Text("The easy way", font_size=36, color=GREEN)
+        pascal_text.next_to(general_form, DOWN)
 
         # Animate Pascal's Triangle construction with faster pace
         self.play(FadeIn(pascal_text))
+        self.play(FadeOut(pascal_text))
         self.play(FadeIn(pascal_triangle[0]))
         for i in range(1, 5):
             self.play(FadeIn(pascal_triangle[i]), run_time=0.5)
@@ -89,7 +92,7 @@ class BinomialTheoremAnimation(Scene):
         self.wait(1)
 
         # Relationship between coefficients and Pascal's Triangle
-        self.play(FadeOut(pascal_triangle[0], pascal_triangle[1], pascal_triangle[2], pascal_triangle[3], pascal_text))
+        self.play(FadeOut(pascal_triangle[0], pascal_triangle[1], pascal_triangle[2], pascal_triangle[3]))
         fourth_row = pascal_triangle[4]
         self.play(fourth_row.animate.next_to(general_form, DOWN, buff=1))
 
@@ -99,10 +102,9 @@ class BinomialTheoremAnimation(Scene):
         ).next_to(fourth_row, DOWN, buff=0.5)
 
         # Text overlay for expansion
-        expansion_text = Text("Expansion for n=4", font_size=36, color=WHITE)
-        expansion_text.next_to(expansion, UP)
+      
 
-        self.play(Write(expansion), FadeIn(expansion_text))
+        self.play(Write(expansion))
         coefficient_indices = [7, 11, 16, 22, 27]  # Indices of the coefficients in the expansion
         for i, index in enumerate(coefficient_indices):
             self.play(
@@ -116,7 +118,7 @@ class BinomialTheoremAnimation(Scene):
         final_message = Text("Master the Binomial Theorem!", font_size=48, color=YELLOW)
         final_message.move_to(ORIGIN)
 
-        self.play(FadeOut(general_form, fourth_row, expansion, expansion_text))
+        self.play(FadeOut(general_form, fourth_row, expansion))
         self.play(Write(final_message))
         self.wait(1)
 
